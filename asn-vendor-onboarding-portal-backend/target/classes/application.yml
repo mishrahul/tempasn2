@@ -1,0 +1,272 @@
+spring:
+  application:
+    name: asn-vendor-onboarding-portal
+  
+  datasource:
+#    url: ${DB_URL:jdbc:postgresql://localhost:5432/db_asn_vendor_onboarding_portal?currentSchema=sch_asn_vendor_onboarding_portal}
+#    username: ${DB_USERNAME:postgres}
+#    password: ${DB_PASSWORD:P@ssw0rd}
+    url: ${DB_URL:jdbc:postgresql://34.93.203.197:5432/db_asn_vendor_onboarding_portal?currentSchema=sch_asn_vendor_onboarding_portal}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Xr9$wP7Z6#Lf@3Bn8*}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${DB_DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: ${DB_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          time_zone: UTC
+    generate-ddl: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+  servlet:
+    multipart:
+      max-file-size: ${FILE_UPLOAD_LIMIT:10MB}
+      max-request-size: ${FILE_UPLOAD_REQUEST_LIMIT:50MB}
+
+  security:
+    user:
+      name: admin
+      password: admin123
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api/v1
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Logging Configuration
+logging:
+  level:
+    in.taxgenie: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_PARAM_LOG_LEVEL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application Security Configuration
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:1E223539-0D5B-4279-8F9A-B3B13BDC7A29-DA01E40D-6806-40FA-B280-44ACB4902845}
+      expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+      refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
+    cors:
+      allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+      allowed-headers: "*"
+      allow-credentials: true
+    aes:
+      encryption-key: ${AES_ENCRYPTION_KEY:ASN-VENDOR-PORTAL-AES-KEY-32-CHARS}
+
+# API Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  show-actuator: true
+
+# Management and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        # Production: Only expose essential endpoints
+        # For development, you can add: env,loggers,threaddump,heapdump
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+      # Add path mapping for security through obscurity (optional)
+      # path-mapping:
+      #   health: healthcheck
+  endpoint:
+    health:
+      # Production: Only show details when authorized
+      show-details: when-authorized
+      show-components: when-authorized
+      # Define health check groups for different access levels
+      group:
+        readiness:
+          include: db,diskSpace
+          show-details: always
+        liveness:
+          include: ping
+          show-details: always
+      probes:
+        enabled: true  # Enable Kubernetes probes
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+    # Sensitive endpoints - disabled by default in production
+    env:
+      enabled: ${ACTUATOR_ENV_ENABLED:false}  # Disable in production
+    loggers:
+      enabled: ${ACTUATOR_LOGGERS_ENABLED:false}  # Disable in production
+    threaddump:
+      enabled: ${ACTUATOR_THREADDUMP_ENABLED:false}
+    heapdump:
+      enabled: ${ACTUATOR_HEAPDUMP_ENABLED:false}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${SPRING_PROFILES_ACTIVE:default}
+    # Enable additional metrics
+    enable:
+      jvm: true
+      process: true
+      system: true
+      tomcat: true
+      logback: true
+      hikaricp: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+
+# Application Info for Actuator /info endpoint
+info:
+  app:
+    name: ASN Vendor Onboarding Portal
+    description: Portal for vendor onboarding and management for ASN compliance
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: 17
+  contact:
+    email: support@asnportal.com
+    phone: +1-800-ASN-HELP
+  features:
+    - Multi-tenant architecture
+    - JWT authentication
+    - OEM portal integration
+    - Subscription management
+    - Real-time monitoring
+
+# Custom Application Properties
+asn:
+  vendor:
+    portal:
+      name: "ASN Vendor Onboarding Portal"
+      version: "1.0.0"
+      description: "Portal for vendor onboarding and management for ASN compliance"
+      contact:
+        email: "support@asnportal.com"
+        phone: "+1-800-ASN-HELP"
+      features:
+        max-vendors-per-oem: ${MAX_VENDORS_PER_OEM:1000}
+        default-session-timeout: ${DEFAULT_SESSION_TIMEOUT:3600}
+        supported-currencies: "INR,USD"
+        file-upload:
+          max-size: ${FILE_UPLOAD_MAX_SIZE:10MB}
+          allowed-types: "pdf,doc,docx,xls,xlsx,jpg,jpeg,png"
+      email:
+        enabled: ${EMAIL_ENABLED:false}
+        smtp:
+          host: ${SMTP_HOST:localhost}
+          port: ${SMTP_PORT:587}
+          username: ${SMTP_USERNAME:}
+          password: ${SMTP_PASSWORD:}
+          auth: true
+          starttls: true
+        from: ${EMAIL_FROM:noreply@asnportal.com}
+      storage:
+        type: ${STORAGE_TYPE:local} # local, aws-s3, gcp-storage
+        local:
+          upload-dir: ${LOCAL_UPLOAD_DIR:./uploads}
+        aws:
+          region: ${AWS_REGION:us-east-1}
+          bucket: ${AWS_BUCKET:asn-vendor-portal}
+          access-key: ${AWS_ACCESS_KEY:}
+          secret-key: ${AWS_SECRET_KEY:}
+        gcp:
+          project-id: ${GCP_PROJECT_ID:}
+          bucket: ${GCP_BUCKET:asn-vendor-portal}
+          credentials-path: ${GCP_CREDENTIALS_PATH:}
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    in.taxgenie: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+# Test Profile
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+logging:
+  level:
+    in.taxgenie: WARN
+    org.springframework.security: ERROR

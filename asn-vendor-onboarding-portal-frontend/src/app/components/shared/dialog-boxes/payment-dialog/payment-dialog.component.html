@@ -1,0 +1,62 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2 class="modal-title">💳 Complete Payment</h2>
+        <p class="modal-subtitle">Pay securely to activate your ASN 2.1 service</p>
+    </div>
+
+    <div class="payment-summary">
+        <h4 class="payment-summary-title">Payment Summary</h4>
+        <div class="summary-item">
+            <span>ASN 2.1 Basic Plan (Annual)</span>
+            <span>₹12,000</span>
+        </div>
+        <div class="summary-item">
+            <span>Setup Fee</span>
+            <span>₹5,000</span>
+        </div>
+        <div class="summary-item">
+            <span>GST (18%)</span>
+            <span>₹3,060</span>
+        </div>
+        <div class="summary-item">
+            <span><strong>Total Amount</strong></span>
+            <span><strong>₹20,060</strong></span>
+        </div>
+    </div>
+
+    <div class="payment-options">
+        <div class="payment-option" (click)="selectPaymentMethod('razorpay')" [class.selected]="selectedMethod === 'razorpay'">
+            <input type="radio" name="payment" value="razorpay" id="razorpay">
+            <div class="payment-icon" style="background: var(--taxgenie-secondary);">💳</div>
+            <div class="payment-details">
+                <h6 class="m-0">Razorpay</h6>
+                <p class="m-0">Credit Card, Debit Card, UPI, Net Banking</p>
+            </div>
+        </div>
+
+        <div class="payment-option" (click)="selectPaymentMethod('upi')" [class.selected]="selectedMethod === 'upi'">
+            <input type="radio" name="payment" value="upi" id="upi">
+            <div class="payment-icon" style="background: var(--success);">📱</div>
+            <div class="payment-details">
+                <h6 class="m-0">UPI Direct</h6>
+                <p class="m-0">Pay using any UPI app (GPay, PhonePe, Paytm)</p>
+            </div>
+        </div>
+
+        <div class="payment-option" (click)="selectPaymentMethod('bank')" [class.selected]="selectedMethod === 'bank'">
+            <input type="radio" name="payment" value="bank" id="bank">
+            <div class="payment-icon" style="background: var(--warning);">🏦</div>
+            <div class="payment-details">
+                <h6 class="m-0">Bank Transfer</h6>
+                <p class="m-0">Direct bank transfer / NEFT / RTGS</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" (click)="closePaymentModal()">Cancel</button>
+        <button class="btn btn-primary btn-full" (click)="processPayment()">
+            💳 Pay ₹20,060
+        </button>
+    </div>
+</div>

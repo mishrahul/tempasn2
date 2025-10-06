@@ -1,0 +1,14 @@
+{
+  "/api/chat": {
+    "target": "https://apl-sandbox.taxgenie.online",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api/chat": "/webhook/asn-verification"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -1,0 +1,151 @@
+<div id="onboarding" class="page" [formGroup]="form">
+    <div class="content-area">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">ASN 2.1 Onboarding</h1>
+            <p class="dashboard-subtitle">Complete your implementation step by step</p>
+        </div>
+
+        <div class="deployment-form-container">
+            <div class="form-header">
+                <h2>🛠️ Self-Deployment Setup</h2>
+                <p>
+                Configure your ASN 2.1 API credentials for independent implementation
+                </p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step">
+                    <div class="step-circle step-complete">✓</div>
+                    <span>Payment Complete</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle step-active">2</div>
+                    <span>API Setup</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle step-pending">3</div>
+                    <span>Deployment</span>
+                </div>
+            </div>
+
+            <div class="alert alert-info d-flex align-items-center gap-2">
+                <span class="step-icon">ℹ️</span>
+                <div>
+                    <strong>API Credential Creation:</strong> We'll create your dedicated ASN
+                    2.1 API credentials using Google Apigee platform. This process typically
+                    takes 2-3 minutes.
+                </div>
+            </div>
+
+            <form (submit)="handleCredentialsSubmission()">
+                <!-- Pre-filled Company Information -->
+                <div class="form-section" formGroupName="company">
+                    <h3 class="section-title">📋 Company Information (Pre-filled)</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label" for="vendorName">TML Vendor Name</label>
+                            <input type="text" class="form-control" id="vendorName" formControlName="vendorName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="vendorCode">Vendor Code</label>
+                            <input type="text" class="form-control" id="vendorCode" formControlName="vendorCode" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="panNumber">PAN Number</label>
+                            <input type="text" class="form-control" id="panNumber" formControlName="panNumber" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="gstinNumber">Primary GSTIN</label>
+                            <input type="text" class="form-control" id="gstinNumber" formControlName="gstinNumber" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- e-Sakha Credentials -->
+                <div class="form-section" formGroupName="credentials">
+                    <h3 class="section-title">🔐 e-Sakha Portal Credentials</h3>
+                    <div class="credentials-info">
+                        <h3>🔐 e-Sakha Portal Information</h3>
+                        <ul>
+                            <li>e-Sakha is Tata Motors' vendor portal for supplier management</li>
+                            <li>Your e-Sakha credentials will be used to authenticate API access</li>
+                            <li>These credentials are required for ASN 2.1 integration</li>
+                            <li>Contact TML IT Support if you don't have e-Sakha access</li>
+                        </ul>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">e-Sakha User ID *</label>
+                            <input type="text" class="form-control" formControlName="userId" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">e-Sakha Password *</label>
+                            <input type="password" class="form-control" formControlName="password" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Configuration -->
+                <div class="form-section" formGroupName="config">
+                    <h3 class="section-title">⚙️ API Configuration</h3>
+                    <div class="mb-3">
+                        <label class="form-label">Environment</label>
+                        <select class="form-select" formControlName="environment">
+                            <option value="sandbox">Sandbox (Testing)</option>
+                            <option value="production">Production (Live)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Webhook URL (Optional)</label>
+                        <input type="url" class="form-control" formControlName="webhookUrl" placeholder="https://your-system.com/webhook/asn" />
+                        <small class="text-muted">URL to receive ASN status notifications</small>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn btn-secondary w-100" (click)="goBackToDeployment()">
+                        ← Back to Deployment Options
+                    </button>
+                    <button type="submit" class="btn btn-primary w-100">
+                        🚀 Create API Credentials
+                    </button>
+                </div>
+            </form>
+
+            <!-- RESPONSE CONTAINER -->
+            <div *ngIf="response" class="response-container" [ngClass]="{ 'response-success': success, 'response-error': !success }">
+                <div *ngIf="success">
+                    <h3>✅ API Credentials Created Successfully!</h3>
+                    <div class="mt-4">
+                        <h4>Your ASN 2.1 API Credentials:</h4>
+                        <p class="mt-4"><strong>Developer ID:</strong> <code> {{ response.developerId }}</code></p>
+                        <p><strong>API Key:</strong> <code> {{ response.apiKey }}</code></p>
+                        <p><strong>Client Secret:</strong> <code> {{ response.clientSecret }}</code></p>
+                        <p><strong>Environment:</strong> {{ response.environment }}</p>
+                        <p><strong>Endpoint URL:</strong> <code> {{ response.endpointUrl }}</code></p>
+                    </div>
+                    <div class="alert alert-info mt-4">
+                        <strong>Credentials Delivered:</strong> Sent to {{ currentUser.email }}
+                    </div>
+                    <button class="btn btn-success me-2" (click)="downloadCredentials()">📥 Download Credentials</button>
+                    <button class="btn btn-primary" (click)="proceedToImplementation()">➡️ Continue to Implementation</button>
+                </div>
+
+                <div *ngIf="!success">
+                    <h3>❌ Credential Creation Failed</h3>
+                    <p class="mt-4"><strong>Error:</strong> {{ response.error }}</p>
+                    <p><strong>Message:</strong> {{ response.message }}</p>
+                    <p *ngIf="response.details"><strong>Details:</strong> {{ response.details }}</p>
+                    <div class="alert alert-danger mt-4">
+                        <strong>Need Help?</strong> Contact TaxGenie support at support&#64;taxgenie.in
+                    </div>
+                    <button class="btn btn-warning" (click)="retry()">🔄 Retry Creation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

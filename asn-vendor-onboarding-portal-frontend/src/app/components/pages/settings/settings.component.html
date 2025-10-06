@@ -1,0 +1,140 @@
+<div class="content-area">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Account Settings</h1>
+        <p class="dashboard-subtitle">Manage your company information and preferences</p>
+    </div>
+
+    <!-- Company Information -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon">🏢</div>
+            <h2 class="section-title">Company Information</h2>
+        </div>
+        
+        <div class="settings-card">
+            <form [formGroup]="companyForm" (ngSubmit)="saveCompanyInfo()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" class="form-input" formControlName="companyName" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PAN Number</label>
+                    <input type="text" class="form-input" formControlName="panNumber" />
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Contact Person</label>
+                    <input type="text" class="form-input" formControlName="contactPerson" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" formControlName="email" />
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-input" formControlName="phone" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company Vendor Code</label>
+                    <input type="text" class="form-input" formControlName="vendorCode"/>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" [disabled]="companyForm.invalid || loading">
+                <span *ngIf="loading" class="spinner"></span>
+                Save Changes
+            </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- GSTIN Management -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon">📋</div>
+            <h2 class="section-title">GSTIN Management</h2>
+        </div>
+        
+        <div class="settings-card">
+            <div class="gstin-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>GSTIN</th>
+                    <th>State</th>
+                    <th>TML Vendor Code</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let gstin of user?.gstinDetails">
+                    <td>{{gstin.gstin}}</td>
+                    <td>{{gstin.state}}</td>
+                    <td>{{gstin.vendorCode}}</td>
+                    <td>
+                    <button class="btn btn-secondary btn-sm">Edit</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+            
+            <div class="gstin-actions">
+            <button class="btn btn-primary">Add New GSTIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Plan -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon">💳</div>
+            <h2 class="section-title">Subscription & Billing</h2>
+        </div>
+        
+        <div class="settings-card">
+            <div class="plan-info">
+                <div>
+                    <h3>Current Plan: {{user?.currentPlan}}</h3>
+                    <p>₹12,000/year + ₹5,000 setup fee</p>
+                    <p>Next billing: September 15, 2025</p>
+                </div>
+                <div class="plan-actions">
+                    <button class="btn btn-primary" routerLink="/plans">Upgrade Plan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OEM Access -->
+    <div class="oem-access-wrapper" *ngIf="oemConfigs | keyvalue as configs">
+        <div class="oem-access-header">
+            <div class="oem-access-icon">🏢</div>
+            <h2 class="oem-access-title">OEM Access</h2>
+        </div>
+
+        <div class="oem-access-card">
+            <p>You have access to the following OEM portals:</p>
+
+            <div class="oem-access-grid">
+                <div *ngFor="let item of configs" class="oem-item" [class.oem-item--active]="item.key === selectedOEM">
+                    <h4>{{ item.value.shortName }}</h4>
+                    <p>{{ item.value.branding.asnVersion }}</p>
+                    <span *ngIf="item.key === selectedOEM; else switchTpl" class="oem-badge">ACTIVE</span>
+                    <ng-template #switchTpl>
+                        <button class="btn btn-secondary oem-switch-btn" (click)="selectOEM(item)">
+                            Switch
+                        </button>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

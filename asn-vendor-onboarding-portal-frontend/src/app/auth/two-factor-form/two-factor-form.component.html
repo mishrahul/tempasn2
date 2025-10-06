@@ -1,0 +1,34 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo"></div>
+      <h2 class="auth-title">Two-Factor Authentication</h2>
+      <p class="auth-subtitle">Enter the 6-digit code sent to your registered mobile</p>
+    </div>
+
+    <form (submit)="onSubmit($event)">
+      <div class="otp-container">
+        <ng-otp-input #otpInput [config]="otpConfig" (onInputChange)="onOtpChange($event)"></ng-otp-input>
+      </div>
+
+      <button type="submit"
+          class="btn btn-primary btn-full d-block fs-6"
+          [disabled]="(otp.length!== 6)"
+          [class.loading]="isLoading">
+          <span class="spinner" [class.hidden]="!isLoading"></span>
+          <span>{{ isLoading ? 'Verifying…' : 'Verify & Continue' }}</span>
+      </button>
+
+      <div class="resend-otp">
+        <p class="resend-timer">Didn't receive the code?</p>
+        <button class="resend-link" [ngClass]="resendIn > 0 ? 'cursor-not-allowed': '' " type="button" (click)="resendOTP()" [disabled]="resendIn > 0">
+          Resend OTP {{ resendIn > 0 ? '(' + resendIn + 's)' : '' }}
+        </button>
+      </div>
+
+      <button type="button" class="btn btn-ghost btn-full mt-3" (click)="switchToSignIn()">
+        Back to Sign In
+      </button>
+    </form>
+  </div>
+</div>

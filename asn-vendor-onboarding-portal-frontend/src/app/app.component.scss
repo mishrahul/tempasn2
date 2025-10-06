@@ -1,0 +1,59 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr; // sidebar flexible
+  gap: 2rem;
+  flex: 1;
+}
+
+.main-content {
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-top: 68px;
+}
+
+/* ✅ For tablets */
+@media (max-width: 1024px) {
+  .main-container {
+    grid-template-columns: 240px 1fr; // sidebar smaller
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+/* ✅ For mobile */
+@media (max-width: 768px) {
+  .main-container {
+    grid-template-columns: 1fr; // sidebar goes above content
+    padding: 0.5rem;
+  }
+
+  app-sidebar {
+    order: -1; // sidebar upar aa jayega
+  }
+
+  .main-content {
+    margin-top: 1rem;
+  }
+}
+
+/* Header fixed */
+app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 60px;
+}

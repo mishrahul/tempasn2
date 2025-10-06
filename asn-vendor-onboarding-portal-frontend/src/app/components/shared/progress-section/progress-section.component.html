@@ -1,0 +1,25 @@
+<div class="progress-section">
+    <div class="progress-content">
+        <div class="progress-header">
+            <div>
+                <h2 class="progress-title">ASN 2.1 Implementation Progress</h2>
+                <p class="progress-subtitle">Track your onboarding journey step by step</p>
+            </div>
+            <div class="progress-circle" [style.--progress]="progress">
+                <span class="progress-percentage">{{ progress }}%</span>
+            </div>
+        </div>
+
+        <ul class="steps-list">
+            <li class="step-item" *ngFor="let step of steps">
+                <div class="step-icon" [ngClass]="getStepIconClass(step)">
+                    {{getStepIconContent(step)}}
+                </div>
+                <div class="step-content">
+                    <div class="step-title">{{step.title}}</div>
+                    <div class="step-description">{{step.description}}</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>

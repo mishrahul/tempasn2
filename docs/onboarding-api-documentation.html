@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding API Documentation - ASN Vendor Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        header p { font-size: 1.1em; opacity: 0.9; }
+        .content { padding: 40px; }
+        .section { margin-bottom: 50px; }
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .flow-step {
+            background: white;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .flow-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -15px;
+            top: 15px;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .flow-step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+            margin-left: 25px;
+        }
+        .flow-step p {
+            margin-left: 25px;
+            color: #555;
+        }
+        .flow-step .endpoint {
+            margin-left: 25px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .flow-arrow {
+            text-align: center;
+            color: #667eea;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .api-endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .api-endpoint h3 { color: #333; font-size: 1.5em; margin-bottom: 15px; }
+        .method {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        .method.get { background: #28a745; color: white; }
+        .method.post { background: #007bff; color: white; }
+        .method.put { background: #ffc107; color: #333; }
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            color: #495057;
+        }
+        .description { margin: 15px 0; color: #555; }
+        .params, .request-body, .response { margin: 20px 0; }
+        .params h4, .request-body h4, .response h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .param-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            border: 1px solid #dee2e6;
+        }
+        .param-name { font-weight: bold; color: #667eea; }
+        .param-type { color: #6c757d; font-style: italic; font-size: 0.9em; }
+        .required { color: #dc3545; font-size: 0.8em; font-weight: bold; }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        code { font-family: 'Courier New', monospace; }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc h3 { color: #667eea; margin-bottom: 15px; }
+        .toc ul { list-style: none; }
+        .toc li { padding: 8px 0; }
+        .toc a { color: #495057; text-decoration: none; transition: color 0.3s; }
+        .toc a:hover { color: #667eea; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .badge.auth { background: #17a2b8; color: white; }
+        .badge.optional { background: #6c757d; color: white; }
+        footer { background: #2d2d2d; color: white; text-align: center; padding: 20px; }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .note strong { color: #856404; }
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+            color: #0c5460;
+        }
+        .info-box ol, .info-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 3px;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Onboarding API Documentation</h1>
+            <p>ASN Vendor Onboarding Portal - Complete API Reference with Call Sequence</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Version 1.0.0 | Base URL: <code>/onboarding</code></p>
+        </header>
+
+        <div class="content">
+            <div class="toc">
+                <h3>📋 Table of Contents</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#flow">API Call Sequence Flow</a></li>
+                    <li><a href="#step1">Step 1: Get Onboarding Progress</a></li>
+                    <li><a href="#step2">Step 2: Confirm ASN Activation</a></li>
+                    <li><a href="#step3">Step 3: Get Available Plans</a></li>
+                    <li><a href="#step4">Step 4: Initiate Payment</a></li>
+                    <li><a href="#step5">Step 5: Check Payment Status</a></li>
+                    <li><a href="#step6">Step 6: Select Deployment Method</a></li>
+                    <li><a href="#step7">Step 7: Create API Credentials</a></li>
+                    <li><a href="#step8">Step 8: Get API Credentials (Optional)</a></li>
+                    <li><a href="#step9">Step 9: Update Step Status (Optional)</a></li>
+                    <li><a href="#step10">Step 10: Complete Onboarding</a></li>
+                    <li><a href="#test">Test API (Health Check)</a></li>
+                </ul>
+            </div>
+
+            <div class="section" id="overview">
+                <h2>📖 Overview</h2>
+                <p>The Onboarding API provides endpoints for managing the vendor onboarding process for ASN 2.1 compliance. This documentation outlines the exact sequence of API calls that the frontend should make to complete the onboarding process.</p>
+                <div class="note">
+                    <strong>Important:</strong> All endpoints require authentication unless otherwise specified. All request/response data uses <strong>camelCase</strong> naming convention.
+                </div>
+                <div class="info-box">
+                    <strong>💡 Frontend Implementation Guide:</strong> Follow the API call sequence outlined in this document. Each step builds upon the previous one, and some steps are optional based on user actions.
+                </div>
+            </div>
+
+            <div class="section" id="authentication">
+                <h2>🔐 Authentication</h2>
+                <p>Include the JWT token in the request header for all authenticated endpoints:</p>
+                <pre><code>Authorization: Bearer &lt;your-jwt-token&gt;</code></pre>
+            </div>
+
+            <div class="section" id="flow">
+                <h2>🔄 API Call Sequence Flow</h2>
+                <p>Follow this sequence when implementing the onboarding flow in your frontend application:</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step" data-step="1">
+                        <h4>Get Onboarding Progress</h4>
+                        <p>Check current onboarding status and determine which step to show</p>
+                        <div class="endpoint">GET /onboarding/progress/{id}</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="2">
+                        <h4>Confirm ASN Activation</h4>
+                        <p>User accepts terms and confirms ASN 2.1 activation</p>
+                        <div class="endpoint">POST /onboarding/confirm-asn</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="3">
+                        <h4>Get Available Plans</h4>
+                        <p>Fetch subscription plans to display to user</p>
+                        <div class="endpoint">GET /onboarding/plans/{id}</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="4">
+                        <h4>Initiate Payment</h4>
+                        <p>User selects a plan and initiates payment</p>
+                        <div class="endpoint">POST /onboarding/initiate-payment</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="5">
+                        <h4>Check Payment Status (Polling)</h4>
+                        <p>Poll this endpoint to check if payment is completed</p>
+                        <div class="endpoint">GET /onboarding/payment-status/{transactionId}</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="6">
+                        <h4>Select Deployment Method</h4>
+                        <p>User chooses self-deployment or assisted implementation</p>
+                        <div class="endpoint">POST /onboarding/select-deployment</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="7">
+                        <h4>Create API Credentials</h4>
+                        <p>Generate API credentials for integration</p>
+                        <div class="endpoint">POST /onboarding/create-credentials</div>
+                    </div>
+                    
+                    <div class="flow-arrow">↓</div>
+                    
+                    <div class="flow-step" data-step="8">
+                        <h4>Complete Onboarding</h4>
+                        <p>Mark the onboarding process as complete</p>
+                        <div class="endpoint">POST /onboarding/complete/{id}</div>
+                    </div>
+                </div>
+                
+                <div class="success-box">
+                    <strong>✅ Onboarding Complete!</strong> User can now access the main application dashboard.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📡 API Endpoints (In Sequence)</h2>
+
+                <div class="api-endpoint" id="step1">
+                    <h3>Step 1: Get Onboarding Progress <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/onboarding/progress/{id}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> On page load, to determine which step to display to the user.</p>
+                        <p><strong>Purpose:</strong> Retrieve current onboarding progress and determine which step the user is on.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">id</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The OEM ID (from logged-in user context)</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Onboarding progress retrieved successfully",
+  "success": true,
+  "data": {
+    "percentage": 33,
+    "completedSteps": 2,
+    "totalSteps": 6,
+    "currentStep": "PAYMENT",
+    "nextStep": "DEPLOYMENT_SELECTION",
+    "estimatedCompletionDays": 7,
+    "steps": [
+      {
+        "id": 1,
+        "title": "ASN Confirmation",
+        "description": "Confirm ASN 2.1 activation",
+        "status": "COMPLETED",
+        "completedAt": "2025-10-01T10:30:00",
+        "estimatedDurationHours": 1
+      },
+      {
+        "id": 2,
+        "title": "Payment",
+        "description": "Select and pay for subscription plan",
+        "status": "CURRENT",
+        "completedAt": null,
+        "estimatedDurationHours": 2
+      }
+    ]
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> Use the <code>currentStep</code> field to navigate user to the appropriate step in the onboarding wizard.
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step2">
+                    <h3>Step 2: Confirm ASN Activation <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/onboarding/confirm-asn</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> When user clicks "Accept & Continue" on the ASN activation confirmation page.</p>
+                        <p><strong>Purpose:</strong> Confirm ASN 2.1 activation and accept terms and conditions.</p>
+                    </div>
+                    <div class="request-body">
+                        <h4>Request Body</h4>
+                        <pre><code>{
+  "oemCode": "OEM001",
+  "confirmationType": "ASN_2_1_ACTIVATION",
+  "acknowledgment": true,
+  "termsAccepted": true,
+  "complianceConfirmed": true,
+  "additionalNotes": "Ready to proceed with onboarding"
+}</code></pre>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "ASN activation confirmed successfully",
+  "success": true,
+  "data": {
+    "confirmationId": "CONF-12345",
+    "status": "CONFIRMED",
+    "confirmedAt": "2025-10-03T14:30:00",
+    "nextStep": "PAYMENT",
+    "nextStepDescription": "Select and pay for subscription plan",
+    "estimatedCompletionTime": "2-3 days",
+    "requirements": {
+      "paymentRequired": true,
+      "deploymentSelectionRequired": true,
+      "apiCredentialsRequired": true,
+      "documentationRequired": false
+    }
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> Navigate user to the subscription plan selection page (Step 3).
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step3">
+                    <h3>Step 3: Get Available Plans <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/onboarding/plans/{id}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> When displaying the subscription plan selection page.</p>
+                        <p><strong>Purpose:</strong> Fetch available subscription plans to display to the user.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">id</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The OEM ID</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Plans retrieved successfully",
+  "success": true,
+  "data": {
+    "plans": [
+      {
+        "planId": "550e8400-e29b-41d4-a716-446655440000",
+        "planCode": "BASIC",
+        "planName": "Basic Plan",
+        "description": "Perfect for small businesses",
+        "pricing": {
+          "yearly": 50000,
+          "monthly": 5000,
+          "setupFee": 1000,
+          "gstRate": 18,
+          "currency": "INR"
+        },
+        "features": [
+          "Up to 100 ASN transactions/month",
+          "Email support",
+          "Basic reporting"
+        ],
+        "apiLimits": {
+          "requestsPerDay": 1000,
+          "requestsPerMinute": 50
+        },
+        "isFeatured": false,
+        "isActive": true
+      }
+    ]
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> Display plans in a card layout. When user selects a plan and clicks "Proceed to Payment", call Step 4.
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step4">
+                    <h3>Step 4: Initiate Payment <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/onboarding/initiate-payment</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> When user clicks "Pay Now" after selecting a subscription plan.</p>
+                        <p><strong>Purpose:</strong> Initiate payment transaction and get payment gateway URL.</p>
+                    </div>
+                    <div class="request-body">
+                        <h4>Request Body</h4>
+                        <pre><code>{
+  "oemCode": "OEM001",
+  "planCode": "BASIC",
+  "paymentMethod": "CREDIT_CARD",
+  "amount": 50000,
+  "currency": "INR",
+  "returnUrl": "https://yourapp.com/onboarding/payment-success",
+  "cancelUrl": "https://yourapp.com/onboarding/payment-cancel",
+  "webhookUrl": "https://yourapp.com/api/payment-webhook"
+}</code></pre>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Payment initiated successfully",
+  "success": true,
+  "data": {
+    "transactionId": "TXN-67890",
+    "transactionRef": "REF-12345",
+    "paymentUrl": "https://payment-gateway.com/pay/xyz123",
+    "paymentToken": "token_abc123xyz",
+    "amount": 50000,
+    "currency": "INR",
+    "status": "INITIATED",
+    "expiresAt": "2025-10-03T15:30:00",
+    "gatewayDetails": {
+      "gatewayName": "Razorpay",
+      "gatewayTransactionId": "pay_abc123",
+      "redirectUrl": "https://payment-gateway.com/pay/xyz123",
+      "qrCodeUrl": null,
+      "instructions": "You will be redirected to payment gateway"
+    }
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> 
+                        <ol>
+                            <li>Store the <code>transactionId</code> in state/localStorage</li>
+                            <li>Redirect user to <code>paymentUrl</code> or open in new window</li>
+                            <li>After user returns from payment gateway, call Step 5 to verify payment status</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step5">
+                    <h3>Step 5: Check Payment Status <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/onboarding/payment-status/{transactionId}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> After user returns from payment gateway. Poll this endpoint every 3-5 seconds until status is SUCCESS or FAILED.</p>
+                        <p><strong>Purpose:</strong> Verify payment completion status.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">transactionId</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The transaction ID from Step 4</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Payment status retrieved successfully",
+  "success": true,
+  "data": {
+    "transactionId": "TXN-67890",
+    "status": "SUCCESS",
+    "amount": 50000,
+    "currency": "INR",
+    "paymentMethod": "CREDIT_CARD",
+    "paidAt": "2025-10-03T14:45:00",
+    "receiptUrl": "https://example.com/receipts/xyz.pdf"
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> 
+                        <ul>
+                            <li>If status is <code>SUCCESS</code>: Show success message and navigate to Step 6</li>
+                            <li>If status is <code>FAILED</code>: Show error message and allow retry</li>
+                            <li>If status is <code>PENDING</code> or <code>PROCESSING</code>: Continue polling</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step6">
+                    <h3>Step 6: Select Deployment Method <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/onboarding/select-deployment</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> When user selects deployment method and clicks "Continue".</p>
+                        <p><strong>Purpose:</strong> Record user's deployment preference (self-deployment or assisted implementation).</p>
+                    </div>
+                    <div class="request-body">
+                        <h4>Request Body</h4>
+                        <pre><code>{
+  "oemCode": "OEM001",
+  "deploymentType": "SELF_DEPLOYMENT",
+  "preferredTimeline": "1_WEEK",
+  "technicalExpertiseLevel": "INTERMEDIATE",
+  "existingErpSystem": "TALLY",
+  "integrationRequirements": "API integration with existing ERP",
+  "additionalServicesRequired": false,
+  "notes": "We have in-house technical team"
+}</code></pre>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Deployment method selected successfully",
+  "success": true,
+  "data": {
+    "deploymentId": "DEP-12345",
+    "deploymentType": "SELF_DEPLOYMENT",
+    "status": "CONFIRMED",
+    "nextStep": "API_CREDENTIALS",
+    "estimatedCompletionDate": "2025-10-10",
+    "supportContact": {
+      "email": "support@asnportal.com",
+      "phone": "+91-1234567890"
+    }
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> Navigate user to API credentials creation page (Step 7).
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step7">
+                    <h3>Step 7: Create API Credentials <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/onboarding/create-credentials</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> When user fills in e-Sakha credentials and clicks "Generate API Keys".</p>
+                        <p><strong>Purpose:</strong> Generate API credentials for integration.</p>
+                    </div>
+                    <div class="request-body">
+                        <h4>Request Body</h4>
+                        <pre><code>{
+  "oemCode": "OEM001",
+  "eSakhaUserId": "user@example.com",
+  "eSakhaPassword": "password123",
+  "environment": "sandbox",
+  "webhookUrl": "https://example.com/webhook",
+  "ipWhitelist": "192.168.1.1,192.168.1.2",
+  "rateLimitTier": "STANDARD"
+}</code></pre>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "API credentials created successfully",
+  "success": true,
+  "data": {
+    "credentialId": "CRED-12345",
+    "apiKey": "ak_live_abc123xyz",
+    "apiSecret": "as_live_secret456",
+    "environment": "sandbox",
+    "status": "ACTIVE",
+    "createdAt": "2025-10-03T15:00:00",
+    "expiresAt": null,
+    "webhookUrl": "https://example.com/webhook",
+    "ipWhitelist": "192.168.1.1,192.168.1.2"
+  }
+}</code></pre>
+                    </div>
+                    <div class="info-box">
+                        <strong>Frontend Action:</strong> 
+                        <ol>
+                            <li>Display the <code>apiKey</code> and <code>apiSecret</code> to user</li>
+                            <li>Provide "Copy" buttons for easy copying</li>
+                            <li>Show warning that <code>apiSecret</code> won't be shown again</li>
+                            <li>Provide "Download" option to save credentials as file</li>
+                            <li>After user confirms, navigate to Step 10 (Complete Onboarding)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step8">
+                    <h3>Step 8: Get API Credentials <span class="badge auth">AUTH</span> <span class="badge optional">OPTIONAL</span></h3>
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/onboarding/credentials/{id}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> If user needs to view credentials again (apiSecret will be masked).</p>
+                        <p><strong>Purpose:</strong> Retrieve existing API credentials.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">id</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The OEM ID</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Credentials retrieved successfully",
+  "success": true,
+  "data": {
+    "credentialId": "CRED-12345",
+    "apiKey": "ak_live_abc123xyz",
+    "apiSecret": "***************",
+    "environment": "sandbox",
+    "status": "ACTIVE",
+    "webhookUrl": "https://example.com/webhook",
+    "ipWhitelist": "192.168.1.1,192.168.1.2"
+  }
+}</code></pre>
+                    </div>
+                    <div class="note">
+                        <strong>Note:</strong> The <code>apiSecret</code> is masked for security. It's only shown once during creation (Step 7).
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step9">
+                    <h3>Step 9: Update Step Status <span class="badge auth">AUTH</span> <span class="badge optional">OPTIONAL</span></h3>
+                    <div>
+                        <span class="method put">PUT</span>
+                        <span class="endpoint-url">/onboarding/step-status/{id}/{stepId}?status={status}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> To manually update step status (usually handled automatically by backend).</p>
+                        <p><strong>Purpose:</strong> Update the status of a specific onboarding step.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">id</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The OEM ID</p>
+                        </div>
+                        <div class="param-item">
+                            <span class="param-name">stepId</span>
+                            <span class="param-type">(Integer)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The step ID (1-6)</p>
+                        </div>
+                    </div>
+                    <div class="params">
+                        <h4>Query Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">status</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>Status: COMPLETED, CURRENT, PENDING, BLOCKED, SKIPPED</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Step status updated successfully",
+  "success": true
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="step10">
+                    <h3>Step 10: Complete Onboarding <span class="badge auth">AUTH</span></h3>
+                    <div>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-url">/onboarding/complete/{id}</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> After all steps are completed and user clicks "Finish Onboarding".</p>
+                        <p><strong>Purpose:</strong> Mark the onboarding process as complete and activate the account.</p>
+                    </div>
+                    <div class="params">
+                        <h4>Path Parameters</h4>
+                        <div class="param-item">
+                            <span class="param-name">id</span>
+                            <span class="param-type">(String)</span>
+                            <span class="required">REQUIRED</span>
+                            <p>The OEM ID</p>
+                        </div>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>{
+  "statusCode": 200,
+  "message": "Onboarding completed successfully",
+  "success": true,
+  "data": {
+    "completionId": "COMP-12345",
+    "completedAt": "2025-10-03T16:00:00",
+    "status": "COMPLETED",
+    "certificateUrl": "https://example.com/certificate/xyz.pdf",
+    "dashboardUrl": "/dashboard",
+    "welcomeMessage": "Welcome to ASN Vendor Portal! Your account is now active."
+  }
+}</code></pre>
+                    </div>
+                    <div class="success-box">
+                        <strong>Frontend Action:</strong> 
+                        <ol>
+                            <li>Show success message with confetti animation</li>
+                            <li>Display certificate download link</li>
+                            <li>Redirect user to main dashboard after 3-5 seconds</li>
+                            <li>Send welcome email (handled by backend)</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="api-endpoint" id="test">
+                    <h3>Test API (Health Check)</h3>
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-url">/onboarding/test</span>
+                    </div>
+                    <div class="description">
+                        <p><strong>When to call:</strong> To verify API availability (no authentication required).</p>
+                        <p><strong>Purpose:</strong> Health check endpoint.</p>
+                    </div>
+                    <div class="response">
+                        <h4>Response (200 OK)</h4>
+                        <pre><code>"Onboarding API is working! All endpoints are available."</code></pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 ASN Vendor Onboarding Portal | Version 1.0.0</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">For support, contact: support@asnportal.com</p>
+        </footer>
+    </div>
+</body>
+</html>

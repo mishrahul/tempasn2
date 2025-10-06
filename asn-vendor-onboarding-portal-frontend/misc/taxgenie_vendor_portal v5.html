@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxGenie | Tata Motors Vendor Portal - ASN 2.1 Implementation</title>
+    <meta name="description" content="TaxGenie powered Tata Motors vendor portal for seamless ASN 2.1 migration. Professional implementation, training, and support.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* TaxGenie Brand Colors */
+            --taxgenie-primary: #1f4e79;
+            --taxgenie-secondary: #2563eb;
+            --taxgenie-accent: #dc2626;
+            --taxgenie-blue-light: #3b82f6;
+            --taxgenie-blue-dark: #1e40af;
+            
+            /* Extended Palette */
+            --success: #059669;
+            --warning: #d97706;
+            --info: #0891b2;
+            --error: #dc2626;
+            
+            /* Neutrals */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Semantic Colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: var(--gray-50);
+            --bg-tertiary: var(--gray-100);
+            --text-primary: var(--gray-900);
+            --text-secondary: var(--gray-600);
+            --text-tertiary: var(--gray-400);
+            --border-light: var(--gray-200);
+            --border-medium: var(--gray-300);
+            
+            /* Effects */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 24px;
+            
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            gap: 2rem;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .taxgenie-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+        }
+
+        .taxgenie-logo:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--taxgenie-accent);
+            border-radius: 2px;
+            top: 6px;
+            left: 6px;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 2px;
+            bottom: 6px;
+            right: 6px;
+        }
+
+        .brand-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--taxgenie-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .portal-badge {
+            background: linear-gradient(135deg, var(--taxgenie-secondary), var(--taxgenie-blue-light));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--taxgenie-primary);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg-tertiary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-trigger:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-medium);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-info p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+            color: white;
+        }
+
+        .sidebar-icon {
+            font-size: 1.25rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        /* Page States */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Dashboard */
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--taxgenie-primary);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .progress-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--taxgenie-primary);
+        }
+
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(var(--success) 0deg 108deg, var(--border-medium) 108deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+        }
+
+        .progress-percentage {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            color: var(--taxgenie-primary);
+        }
+
+        .steps-list {
+            list-style: none;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--taxgenie-primary);
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Plans Section */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+        }
+
+        .plan-card.featured {
+            border-color: var(--taxgenie-secondary);
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+        }
+
+        .plan-card.featured::before {
+            content: 'RECOMMENDED';
+            position: absolute;
+            top: 1rem;
+            right: -2rem;
+            background: var(--taxgenie-accent);
+            color: white;
+            padding: 0.25rem 3rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transform: rotate(45deg);
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--taxgenie-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price .currency {
+            font-size: 1.5rem;
+        }
+
+        .plan-period {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .feature-icon.unavailable {
+            background: var(--gray-300);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--taxgenie-primary);
+            border: 2px solid var(--taxgenie-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--taxgenie-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: var(--transition);
+            background: var(--bg-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--taxgenie-secondary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Settings Page */
+        .settings-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .settings-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+        }
+
+        /* Alert/Notice */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #059669;
+            color: #065f46;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                position: static;
+                order: 2;
+            }
+
+            .main-content {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .brand-section {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="brand-section">
+                <a href="#" class="taxgenie-logo">
+                    <div class="logo-icon"></div>
+                    <span class="brand-text">TaxGenie</span>
+                </a>
+                <div class="portal-badge">Tata Motors Vendor Portal</div>
+            </div>
+            
+            <nav class="header-nav">
+                <a href="#" class="nav-link" onclick="switchPage('dashboard')">
+                    🏠 Dashboard
+                </a>
+                <a href="#" class="nav-link" onclick="switchPage('plans')">
+                    📊 Plans
+                </a>
+                <a href="#" class="nav-link" onclick="switchPage('settings')">
+                    ⚙️ Settings
+                </a>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-trigger">
+                    <div class="user-avatar">XS</div>
+                    <div class="user-info">
+                        <h4>XYZ Solutions</h4>
+                        <p>Basic Plan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link active" onclick="switchPage('dashboard')">
+                            <span class="sidebar-icon">🏠</span>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="switchPage('onboarding')">
+                            <span class="sidebar-icon">🚀</span>
+                            Onboarding
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="switchPage('plans')">
+                            <span class="sidebar-icon">📊</span>
+                            Subscription Plans
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="switchPage('self-deployment')">
+                            <span class="sidebar-icon">🛠️</span>
+                            Self-Deployment Support
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="switchPage('ai-specialist')">
+                            <span class="sidebar-icon">🤖</span>
+                            ASN AI Specialist
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link" onclick="switchPage('settings')">
+                            <span class="sidebar-icon">⚙️</span>
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">Welcome to TaxGenie's Tata Motors ASN 2.1 Portal</h1>
+                        <p class="dashboard-subtitle">Your comprehensive solution for Tata Motors ASN 2.1 implementation</p>
+                    </div>
+
+                    <!-- Critical Alert -->
+                    <div class="alert alert-warning">
+                        <span style="font-size: 1.5rem;">⚠️</span>
+                        <div>
+                            <strong>Critical Deadline: 30th September 2025</strong> - ASN 2.1 migration must be completed by this date to ensure continuity of your Auto ASN functionalities.
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: var(--success);">✅</div>
+                            </div>
+                            <div class="stat-value">30%</div>
+                            <div class="stat-label">Implementation Progress</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: var(--info);">📋</div>
+                            </div>
+                            <div class="stat-value">2/6</div>
+                            <div class="stat-label">Completed Steps</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: var(--warning);">📅</div>
+                            </div>
+                            <div class="stat-value">41</div>
+                            <div class="stat-label">Days Remaining (Sep 30, 2025)</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon" style="background: var(--taxgenie-primary);">📊</div>
+                            </div>
+                            <div class="stat-value">Basic</div>
+                            <div class="stat-label">Current Plan</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div class="progress-section">
+                        <div class="progress-content">
+                            <div class="progress-header">
+                                <div>
+                                    <h2 class="progress-title">ASN 2.1 Implementation Progress</h2>
+                                    <p style="color: var(--text-secondary);">Track your onboarding journey step by step</p>
+                                </div>
+                                <div class="progress-circle">
+                                    <span class="progress-percentage">30%</span>
+                                </div>
+                            </div>
+                            
+                            <ul class="steps-list">
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--success); color: white;">✓</div>
+                                    <div class="step-content">
+                                        <div class="step-title">Account Setup</div>
+                                        <div class="step-description">Initial registration and vendor verification completed</div>
+                                    </div>
+                                </li>
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--taxgenie-accent); color: white;">2</div>
+                                    <div class="step-content">
+                                        <div class="step-title">ASN 2.1 Confirmation</div>
+                                        <div class="step-description">Review and confirm implementation requirements</div>
+                                    </div>
+                                </li>
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--gray-400); color: white;">3</div>
+                                    <div class="step-content">
+                                        <div class="step-title">Deployment Method Selection</div>
+                                        <div class="step-description">Choose between self-deployment or assisted implementation</div>
+                                    </div>
+                                </li>
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--gray-400); color: white;">4</div>
+                                    <div class="step-content">
+                                        <div class="step-title">Payment</div>
+                                        <div class="step-description">Pay based on Deployment Method Selection</div>
+                                    </div>
+                                </li>
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--gray-400); color: white;">5</div>
+                                    <div class="step-content">
+                                        <div class="step-title">Implementation and UAT</div>
+                                        <div class="step-description">ERP/Tally Integration & UAT</div>
+                                    </div>
+                                </li>
+                                <li class="step-item">
+                                    <div class="step-icon" style="background: var(--gray-400); color: white;">6</div>
+                                    <div class="step-content">
+                                        <div class="step-title">Production Go Live</div>
+                                        <div class="step-description">Final deployment and activation</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <button class="btn btn-primary btn-full" onclick="switchPage('onboarding')">
+                            🚀 Continue Onboarding
+                        </button>
+                        <button class="btn btn-secondary btn-full" onclick="switchPage('ai-specialist')">
+                            🤖 Launch AI Specialist
+                        </button>
+                        <button class="btn btn-success btn-full" onclick="switchPage('plans')">
+                            ⬆️ Upgrade Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Plans Page -->
+            <div id="plans" class="page">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">Subscription Plans</h1>
+                        <p class="dashboard-subtitle">Choose the plan that best fits your business needs</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <span style="font-size: 1.5rem;">💡</span>
+                        <div>
+                            <strong>Current Plan: Basic</strong> - Upgrade to Professional or Enterprise for enhanced features and priority support.
+                        </div>
+                    </div>
+
+                    <div class="plans-grid">
+                        <!-- Basic Plan -->
+                        <div class="plan-card">
+                            <div class="plan-header">
+                                <h3 class="plan-name">Basic</h3>
+                                <div class="plan-price">
+                                    <span class="currency">₹</span>12,000
+                                </div>
+                                <div class="plan-period">per year + ₹5,000 setup</div>
+                            </div>
+                            
+                            <ul class="plan-features">
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>ASN 2.1 Basic Implementation</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Digital Invoice Upload</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Standard ERP Connectors</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Email Support</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Basic Training Materials</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon unavailable">✗</span>
+                                    <span>Priority Support</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon unavailable">✗</span>
+                                    <span>Custom Integrations</span>
+                                </li>
+                            </ul>
+                            
+                            <button class="btn btn-secondary btn-full" disabled>
+                                Current Plan
+                            </button>
+                            <button class="btn btn-primary btn-full" onclick="switchPage('plans')" style="margin-top: 0.5rem;">
+                                ⬆️ Upgrade
+                            </button>
+                        </div>
+
+                        <!-- Professional Plan -->
+                        <div class="plan-card featured">
+                            <div class="plan-header">
+                                <h3 class="plan-name">Professional</h3>
+                                <div class="plan-price">
+                                    <span class="currency">₹</span>25,000
+                                </div>
+                                <div class="plan-period">per year + ₹8,000 setup</div>
+                            </div>
+                            
+                            <ul class="plan-features">
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Everything in Basic</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Priority Support (24/7)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Advanced Training & Webinars</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Custom ERP Integration (1 Free)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Dedicated Account Manager</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Monthly Expert Consultations</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Advanced Analytics Dashboard</span>
+                                </li>
+                            </ul>
+                            
+                            <button class="btn btn-primary btn-full" onclick="upgradePlan('professional')">
+                                Upgrade to Professional
+                            </button>
+                        </div>
+
+                        <!-- Enterprise Plan -->
+                        <div class="plan-card">
+                            <div class="plan-header">
+                                <h3 class="plan-name">Enterprise</h3>
+                                <div class="plan-price">
+                                    <span class="currency">₹</span>50,000
+                                </div>
+                                <div class="plan-period">per year + ₹15,000 setup</div>
+                            </div>
+                            
+                            <ul class="plan-features">
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Everything in Professional</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>White-Label Solution</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Unlimited Custom Integrations</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>On-Site Implementation Support</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>SLA Guarantees (99.9% uptime)</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>Custom Training Programs</span>
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✓</span>
+                                    <span>API Access & Customization</span>
+                                </li>
+                            </ul>
+                            
+                            <button class="btn btn-primary btn-full" onclick="upgradePlan('enterprise')">
+                                Upgrade to Enterprise
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contact for Custom Plans -->
+                    <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); text-align: center; margin-top: 2rem;">
+                        <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">Need a Custom Solution?</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Contact our sales team for enterprise-grade custom implementations and volume discounts.</p>
+                        <button class="btn btn-primary" onclick="contactSales()">
+                            📞 Contact Sales Team
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">Account Settings</h1>
+                        <p class="dashboard-subtitle">Manage your company information and preferences</p>
+                    </div>
+
+                    <!-- Company Information -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <div class="section-icon">🏢</div>
+                            <h2 class="section-title">Company Information</h2>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <form id="companyForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Company Name</label>
+                                        <input type="text" class="form-input" value="XYZ Solutions Pvt Ltd" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">PAN Number</label>
+                                        <input type="text" class="form-input" value="DAKOU6543G" />
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Contact Person</label>
+                                        <input type="text" class="form-input" value="Aditya Mehta" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-input" value="adiinternational@gmail.com" />
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-input" value="+91 XXX XXX 1234" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" class="form-input" placeholder="Company Address" />
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    💾 Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- GSTIN Management -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <div class="section-icon">📋</div>
+                            <h2 class="section-title">GSTIN Management</h2>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: var(--bg-tertiary);">
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">GSTIN</th>
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">State</th>
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">TML Vendor Code</th>
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style="border-bottom: 1px solid var(--border-light);">
+                                            <td style="padding: 1rem;">27AAEPM1234C1ZV</td>
+                                            <td style="padding: 1rem;">Maharashtra</td>
+                                            <td style="padding: 1rem;">V00254</td>
+                                            <td style="padding: 1rem;">
+                                                <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.75rem;">
+                                                    ✏️ Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid var(--border-light);">
+                                            <td style="padding: 1rem;">29AABFR7890K1ZW</td>
+                                            <td style="padding: 1rem;">Karnataka</td>
+                                            <td style="padding: 1rem;">V00675</td>
+                                            <td style="padding: 1rem;">
+                                                <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.75rem;">
+                                                    ✏️ Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem;">
+                                <button class="btn btn-primary">
+                                    ➕ Add New GSTIN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Plan & Billing -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <div class="section-icon">💳</div>
+                            <h2 class="section-title">Subscription & Billing</h2>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+                                <div>
+                                    <h3 style="color: var(--taxgenie-primary); margin-bottom: 0.5rem;">Current Plan: Basic</h3>
+                                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">₹12,000/year + ₹5,000 setup fee</p>
+                                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Next billing: September 15, 2025</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <button class="btn btn-primary" onclick="switchPage('plans')">
+                                        ⬆️ Upgrade Plan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Preferences -->
+                    <div class="settings-section">
+                        <div class="section-header">
+                            <div class="section-icon">🔔</div>
+                            <h2 class="section-title">Notification Preferences</h2>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <div style="display: grid; gap: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Email Notifications</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Receive updates about implementation progress</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">SMS Alerts</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Critical updates and deadlines</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="margin-bottom: 0.25rem;">Marketing Communications</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.875rem;">Product updates and promotional content</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Self-Deployment Support Page -->
+            <div id="self-deployment" class="page">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">Self-Deployment Support</h1>
+                        <p class="dashboard-subtitle">Complete toolkit for independent ASN 2.1 implementation</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <span style="font-size: 1.5rem;">🎯</span>
+                        <div>
+                            <strong>Self-Deployment Benefits:</strong> Cost-effective implementation with comprehensive support resources and expert guidance when needed.
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        <!-- Self-deployment training documents & videos -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--taxgenie-primary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--taxgenie-primary);">📚</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">Training Documents & Videos</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Comprehensive self-paced learning materials</p>
+                            <div style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 1rem; display: inline-block;">FREE</div>
+                            <button class="btn btn-primary btn-full">Access Training Materials</button>
+                        </div>
+
+                        <!-- Live Webinar -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--taxgenie-secondary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--taxgenie-secondary);">📺</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">Live Webinar</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Interactive group sessions with Q&A</p>
+                            <div style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 1rem; display: inline-block;">FREE</div>
+                            <button class="btn btn-primary btn-full">Join Next Webinar</button>
+                        </div>
+
+                        <!-- Book slot with ASN Specialist -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--warning);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--warning);">👨‍💼</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">ASN Specialist Consultation</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">One-on-one guidance from certified specialists</p>
+                            <div style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; display: inline-block;">30 min FREE</div>
+                            <div style="background: var(--warning); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 1rem; display: inline-block; font-size: 0.875rem;">Then Chargeable</div>
+                            <button class="btn btn-primary btn-full">Book Specialist Session</button>
+                        </div>
+
+                        <!-- Chat with TaxGenie ASN AI Expert -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--taxgenie-accent);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--taxgenie-accent);">🤖</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">ASN AI Specialist</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">24/7 AI-powered instant assistance</p>
+                            <div style="background: var(--success); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 0.5rem; display: inline-block;">FREE</div>
+                            <div style="background: var(--info); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 600; margin-bottom: 1rem; display: inline-block; font-size: 0.875rem;">Limited Time</div>
+                            <button class="btn btn-primary btn-full" onclick="switchPage('ai-specialist')">Start AI Chat</button>
+                        </div>
+                    </div>
+
+                    <!-- Additional Resources -->
+                    <div style="background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary)); color: white; padding: 3rem; border-radius: var(--radius-xl); margin-top: 2rem; text-align: center;">
+                        <h2 style="margin-bottom: 1rem;">Complete Self-Deployment Package</h2>
+                        <p style="opacity: 0.9; margin-bottom: 2rem; font-size: 1.125rem;">Everything you need for successful independent implementation</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📖</div>
+                                <h4>Step-by-Step Guides</h4>
+                                <p style="opacity: 0.8; font-size: 0.875rem;">Detailed implementation manuals</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎥</div>
+                                <h4>Video Tutorials</h4>
+                                <p style="opacity: 0.8; font-size: 0.875rem;">Visual learning modules</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                                <h4>Checklists & Templates</h4>
+                                <p style="opacity: 0.8; font-size: 0.875rem;">Ready-to-use resources</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛠️</div>
+                                <h4>Testing Tools</h4>
+                                <p style="opacity: 0.8; font-size: 0.875rem;">Validation and testing utilities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASN AI Specialist Page -->
+            <div id="ai-specialist" class="page">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">TaxGenie ASN AI Specialist</h1>
+                        <p class="dashboard-subtitle">Advanced AI-powered assistant for intelligent ASN 2.1 implementation and real-time expert guidance</p>
+                    </div>
+
+                    <!-- AI Specialist Hero Section -->
+                    <div style="background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary)); color: white; padding: 3rem; border-radius: var(--radius-xl); margin-bottom: 2rem; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); border-radius: 50%; transform: translate(50%, -50%);"></div>
+                        
+                        <div style="position: relative; z-index: 1; text-align: center;">
+                            <div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>
+                            <h2 style="margin-bottom: 1rem; font-size: 2rem;">TaxGenie ASN Expert AI Assistant</h2>
+                            <p style="opacity: 0.9; margin-bottom: 2rem; font-size: 1.125rem; max-width: 600px; margin-left: auto; margin-right: auto;">Experience the future of ASN 2.1 implementation with our advanced AI assistant. Get expert guidance, real-time support, and intelligent solutions for all your ERP integration needs.</p>
+                            
+                            <button class="btn" onclick="launchAISpecialist()" style="background: white; color: var(--taxgenie-primary); font-weight: 700; font-size: 1.125rem; padding: 1rem 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2);">
+                                🚀 Launch AI Specialist
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Capabilities Overview -->
+                    <div class="alert alert-info" style="margin-bottom: 2rem;">
+                        <span style="font-size: 1.5rem;">⚡</span>
+                        <div>
+                            <strong>Intelligent AI Integration:</strong> Our ASN AI Specialist is powered by advanced machine learning and connects directly with TaxGenie's knowledge base for real-time, accurate responses.
+                        </div>
+                    </div>
+
+                    <!-- Feature Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                        <!-- Advanced AI Intelligence -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--taxgenie-primary); position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));"></div>
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--taxgenie-primary);">🧠</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">Advanced AI Intelligence</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Powered by state-of-the-art natural language processing and machine learning algorithms for intelligent responses</p>
+                            <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Natural language understanding
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Context-aware responses
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Learning from interactions
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Real-time Knowledge Base -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--taxgenie-secondary);">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, var(--taxgenie-secondary), var(--taxgenie-blue-light));"></div>
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--taxgenie-secondary);">📚</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">Real-time Knowledge Base</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Connected to TaxGenie's comprehensive ASN 2.1 knowledge repository and latest updates</p>
+                            <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Latest ASN 2.1 documentation
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> ERP integration guides
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Best practices & troubleshooting
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 24/7 Availability -->
+                        <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); border: 2px solid var(--success);">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, var(--success), #047857);"></div>
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--success);">🕐</div>
+                            <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem;">24/7 Availability</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Round-the-clock assistance with instant responses and continuous learning capabilities</p>
+                            <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Instant response times
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> No waiting periods
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--success);">✓</span> Always learning & improving
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- AI Specialist Capabilities -->
+                    <div style="background: var(--bg-secondary); padding: 3rem; border-radius: var(--radius-xl); margin-bottom: 2rem; border: 1px solid var(--border-light);">
+                        <h3 style="color: var(--taxgenie-primary); margin-bottom: 2rem; text-align: center; font-size: 1.5rem;">🎯 AI Specialist Capabilities</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--taxgenie-primary);">🚀</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">ASN 2.1 Implementation</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Step-by-step guidance for complete ASN 2.1 setup, configuration, and deployment</p>
+                            </div>
+
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--taxgenie-secondary);">🔗</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">ERP Integration</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Expert assistance for SAP, Tally, Oracle, and custom ERP system integrations</p>
+                            </div>
+
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--success);">🛠️</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">Troubleshooting</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Intelligent problem diagnosis and resolution for technical issues</p>
+                            </div>
+
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--warning);">📊</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">Best Practices</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Industry best practices and optimization recommendations</p>
+                            </div>
+
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--info);">📋</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">Compliance Guidance</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">GST compliance requirements and regulatory updates</p>
+                            </div>
+
+                            <div style="text-align: center; padding: 1.5rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--taxgenie-accent);">⚡</div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 0.75rem;">Performance Optimization</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">System performance tuning and efficiency improvements</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Specifications -->
+                    <div style="background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); padding: 2.5rem; border-radius: var(--radius-xl); margin-bottom: 2rem; border: 1px solid var(--border-medium);">
+                        <h3 style="color: var(--taxgenie-primary); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="font-size: 1.5rem;">⚙️</span>
+                            Technical Specifications
+                        </h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                            <div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 1rem; font-size: 1.125rem;">🧠 AI Engine</h4>
+                                <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                    <li style="margin-bottom: 0.5rem;">• Advanced NLP processing</li>
+                                    <li style="margin-bottom: 0.5rem;">• Machine learning algorithms</li>
+                                    <li style="margin-bottom: 0.5rem;">• Context-aware responses</li>
+                                    <li style="margin-bottom: 0.5rem;">• Continuous learning capabilities</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 1rem; font-size: 1.125rem;">🔗 Integration</h4>
+                                <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                    <li style="margin-bottom: 0.5rem;">• RESTful API connectivity</li>
+                                    <li style="margin-bottom: 0.5rem;">• n8n workflow integration</li>
+                                    <li style="margin-bottom: 0.5rem;">• Real-time knowledge sync</li>
+                                    <li style="margin-bottom: 0.5rem;">• Secure authentication</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 style="color: var(--taxgenie-primary); margin-bottom: 1rem; font-size: 1.125rem;">🛡️ Security</h4>
+                                <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                                    <li style="margin-bottom: 0.5rem;">• End-to-end encryption</li>
+                                    <li style="margin-bottom: 0.5rem;">• Data privacy protection</li>
+                                    <li style="margin-bottom: 0.5rem;">• Secure session management</li>
+                                    <li style="margin-bottom: 0.5rem;">• GDPR compliance</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Launch AI Specialist -->
+                    <div style="text-align: center; background: white; padding: 3rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg);">
+                        <h3 style="color: var(--taxgenie-primary); margin-bottom: 1rem; font-size: 1.5rem;">Ready to Experience AI-Powered ASN Assistance?</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.125rem;">Launch the TaxGenie ASN AI Specialist for instant, intelligent support</p>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="launchAISpecialist()" style="font-size: 1.125rem; padding: 1rem 2rem;">
+                                🤖 Launch AI Specialist
+                            </button>
+                            <button class="btn btn-secondary" onclick="showAIDemo()" style="font-size: 1.125rem; padding: 1rem 2rem;">
+                                🎥 View Demo
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: var(--radius-lg); border-left: 4px solid var(--taxgenie-primary);">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                                <strong style="color: var(--taxgenie-primary);">Note:</strong> The AI Specialist opens in a new window for optimal performance. Ensure pop-ups are enabled for the best experience.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onboarding Page -->
+            <div id="onboarding" class="page">
+                <div class="content-area">
+                    <div class="dashboard-header">
+                        <h1 class="dashboard-title">ASN 2.1 Onboarding</h1>
+                        <p class="dashboard-subtitle">Complete your implementation step by step</p>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <span style="font-size: 1.5rem;">🎉</span>
+                        <div>
+                            <strong>Step 1 Completed:</strong> Account setup and vendor verification successful. Ready to proceed with ASN 2.1 confirmation.
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem;">
+                        <h3 style="color: var(--taxgenie-primary); margin-bottom: 1.5rem;">Current Step: ASN 2.1 Confirmation</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Review your vendor details and confirm ASN 2.1 activation requirements. Next step will be Deployment Method Selection.</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                            <div>
+                                <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Company Details</h4>
+                                <div style="background: white; padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                                    <p><strong>Company:</strong> XYZ Solutions Pvt Ltd</p>
+                                    <p><strong>PAN:</strong> DAKOU6543G</p>
+                                    <p><strong>Contact:</strong> Aditya Mehta</p>
+                                    <p><strong>Email:</strong> adiinternational@gmail.com</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 style="color: var(--text-primary); margin-bottom: 1rem;">GSTIN Details</h4>
+                                <div style="background: white; padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                                    <p><strong>Maharashtra:</strong> 27AAEPM1234C1ZV (V00254)</p>
+                                    <p><strong>Karnataka:</strong> 29AABFR7890K1ZW (V00675)</p>
+                                    <p><strong>Goa:</strong> 30AABFR7890K1ZW (V00546)</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button class="btn btn-success" style="font-size: 1.125rem; padding: 1rem 2rem;" onclick="confirmASN()">
+                                ✅ Confirm ASN 2.1 Activation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Page Navigation
+        function switchPage(pageId) {
+            // Remove active class from all pages and nav links
+            document.querySelectorAll('.page').forEach(function(page) {
+                page.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-link').forEach(function(link) {
+                link.classList.remove('active');
+            });
+            
+            // Show target page
+            var targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                targetPage.classList.add('animate-in');
+            }
+            
+            // Update active nav link
+            var activeLink = document.querySelector('[onclick="switchPage(\'' + pageId + '\')"]');
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // Plan Upgrade Functionality
+        function upgradePlan(planType) {
+            var button = event.target;
+            var originalText = button.innerHTML;
+            
+            // Show loading state
+            button.classList.add('loading');
+            button.innerHTML = '<span class="spinner"></span> Processing...';
+            button.disabled = true;
+            
+            // Simulate API call
+            setTimeout(function() {
+                button.classList.remove('loading');
+                button.innerHTML = '✅ Upgrade Successful!';
+                button.style.background = 'var(--success)';
+                
+                // Show success notification
+                showNotification('Successfully upgraded to ' + planType.charAt(0).toUpperCase() + planType.slice(1) + ' plan!', 'success');
+                
+                // Update user info in header
+                setTimeout(function() {
+                    var userPlan = document.querySelector('.user-info p');
+                    if (userPlan) {
+                        userPlan.textContent = planType.charAt(0).toUpperCase() + planType.slice(1) + ' Plan';
+                    }
+                }, 1000);
+                
+            }, 2000);
+        }
+
+        // Contact Sales
+        function contactSales() {
+            showNotification('Redirecting to sales team...', 'info');
+            console.log('Contact sales initiated');
+        }
+
+        // ASN Confirmation
+        function confirmASN() {
+            var button = event.target;
+            button.classList.add('loading');
+            button.innerHTML = '<span class="spinner"></span> Processing Confirmation...';
+            button.disabled = true;
+            
+            setTimeout(function() {
+                button.classList.remove('loading');
+                button.innerHTML = '✅ Confirmed Successfully!';
+                button.style.background = 'var(--success)';
+                
+                showNotification('ASN 2.1 activation confirmed! Next: Deployment Method Selection.', 'success');
+                
+                // Update progress to show deployment method selection as current step
+                setTimeout(function() {
+                    switchPage('dashboard');
+                    updateProgress(45);
+                }, 2000);
+            }, 2000);
+        }
+
+        // Update Progress
+        function updateProgress(percentage) {
+            var progressText = document.querySelector('.progress-percentage');
+            var progressCircle = document.querySelector('.progress-circle');
+            
+            if (progressText) progressText.textContent = percentage + '%';
+            
+            // Update stats
+            var progressStat = document.querySelector('.stat-value');
+            if (progressStat) progressStat.textContent = percentage + '%';
+        }
+
+        // AI Specialist Functions
+        function launchAISpecialist() {
+            try {
+                // Create AI specialist window with proper error handling
+                var aiWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                
+                if (!aiWindow) {
+                    showNotification('Please allow pop-ups to launch AI Specialist', 'warning');
+                    return;
+                }
+
+                var aiSpecialistHTML = '<!DOCTYPE html>' +
+                '<html lang="en">' +
+                '<head>' +
+                    '<meta charset="UTF-8">' +
+                    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+                    '<title>TaxGenie ASN Expert AI</title>' +
+                    '<style>' +
+                        'body { font-family: system-ui, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f8fafc, #e2e8f0); min-height: 100vh; }' +
+                        '.container { max-width: 1000px; margin: 0 auto; padding: 2rem; }' +
+                        '.header { text-align: center; margin-bottom: 3rem; }' +
+                        '.logo { width: 80px; height: 80px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 16px; margin: 0 auto 1.5rem; position: relative; }' +
+                        '.logo::before { content: ""; position: absolute; width: 20px; height: 20px; background: #dc2626; border-radius: 4px; top: 15px; left: 15px; }' +
+                        '.logo::after { content: ""; position: absolute; width: 16px; height: 16px; background: white; border-radius: 4px; bottom: 15px; right: 15px; }' +
+                        '.title { color: #2563eb; margin-bottom: 1rem; font-size: 2rem; font-weight: 700; }' +
+                        '.subtitle { color: #6b7280; font-size: 1.125rem; margin-bottom: 2rem; }' +
+                        '.status { background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 2rem; border-radius: 16px; border-left: 4px solid #2563eb; margin-bottom: 2rem; }' +
+                        '.status h3 { color: #1e40af; margin-bottom: 1rem; }' +
+                        '.status p { color: #1e40af; margin-bottom: 1rem; }' +
+                        '.status ul { color: #1e40af; padding-left: 2rem; }' +
+                        '.integration { background: #f3f4f6; padding: 2rem; border-radius: 16px; border: 2px dashed #d1d5db; text-align: center; }' +
+                        '.integration h3 { color: #374151; margin-bottom: 1rem; }' +
+                        '.integration p { color: #6b7280; margin-bottom: 1.5rem; }' +
+                        '.btn { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 1rem; }' +
+                        '.note { margin-top: 2rem; text-align: center; padding: 1.5rem; background: #f9fafb; border-radius: 12px; }' +
+                        '.note p { color: #6b7280; font-size: 0.875rem; margin: 0; }' +
+                        '.note strong { color: #6b7280; }' +
+                    '</style>' +
+                '</head>' +
+                '<body>' +
+                    '<div class="container">' +
+                        '<div class="header">' +
+                            '<div class="logo"></div>' +
+                            '<h1 class="title">TaxGenie ASN Expert AI</h1>' +
+                            '<p class="subtitle">Advanced AI Assistant for ASN 2.1 Implementation</p>' +
+                        '</div>' +
+                        
+                        '<div class="status">' +
+                            '<h3>🚀 AI Specialist Ready</h3>' +
+                            '<p>The TaxGenie ASN Expert AI is successfully loaded and ready to assist you with:</p>' +
+                            '<ul>' +
+                                '<li>ASN 2.1 implementation guidance</li>' +
+                                '<li>ERP integration support</li>' +
+                                '<li>Technical troubleshooting</li>' +
+                                '<li>Best practices and optimization</li>' +
+                                '<li>Compliance and regulatory guidance</li>' +
+                            '</ul>' +
+                        '</div>' +
+                        
+                        '<div class="integration">' +
+                            '<h3>🔗 Integration Status</h3>' +
+                            '<p>To enable full AI functionality, configure your n8n workflow endpoint in the settings panel.</p>' +
+                            '<button class="btn" onclick="alert(\'In a production environment, this would open the AI chat interface with full n8n integration. Configure your webhook endpoint in the settings to enable real-time AI responses.\')">⚙️ Configure AI Integration</button>' +
+                        '</div>' +
+                        
+                        '<div class="note">' +
+                            '<p><strong>Demo Mode:</strong> This is a demonstration of the AI Specialist interface. In the full implementation, this would connect to your configured AI workflow and knowledge base.</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</body>' +
+                '</html>';
+
+                aiWindow.document.write(aiSpecialistHTML);
+                aiWindow.document.close();
+                
+                console.log('🤖 TaxGenie ASN AI Specialist launched successfully');
+                showNotification('AI Specialist launched in new window', 'success');
+                
+            } catch (error) {
+                console.error('Error launching AI Specialist:', error);
+                showNotification('Error launching AI Specialist. Please try again.', 'error');
+            }
+        }
+
+        function showAIDemo() {
+            showNotification('Demo video will be available soon. Contact support for a live demonstration.', 'info');
+            console.log('🎥 AI Specialist demo requested');
+            
+            setTimeout(function() {
+                alert('📺 AI Specialist Demo\n\nOur AI Specialist provides:\n\n🧠 Intelligent ASN 2.1 guidance\n🔗 ERP integration support\n⚡ Real-time troubleshooting\n📚 Knowledge base access\n🛡️ Security & compliance advice\n\nContact our team for a personalized demonstration!');
+            }, 500);
+        }
+
+        // Notification System
+        function showNotification(message, type) {
+            type = type || 'info';
+            
+            var notification = document.createElement('div');
+            notification.style.cssText = 
+                'position: fixed; top: 20px; right: 20px; z-index: 1000; ' +
+                'padding: 1rem 1.5rem; border-radius: 12px; font-weight: 600; ' +
+                'max-width: 300px; transform: translateX(400px); ' +
+                'transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); ' +
+                'box-shadow: 0 10px 25px rgba(0,0,0,0.15);';
+            
+            if (type === 'success') {
+                notification.style.background = 'var(--success)';
+                notification.style.color = 'white';
+            } else if (type === 'error') {
+                notification.style.background = 'var(--error)';
+                notification.style.color = 'white';
+            } else if (type === 'warning') {
+                notification.style.background = 'var(--warning)';
+                notification.style.color = 'white';
+            } else {
+                notification.style.background = 'var(--info)';
+                notification.style.color = 'white';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(function() {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 4 seconds
+            setTimeout(function() {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(function() {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Form Handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Company form submission
+            var companyForm = document.getElementById('companyForm');
+            if (companyForm) {
+                companyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    showNotification('Company information updated successfully!', 'success');
+                });
+            }
+            
+            // Initialize portal
+            console.log('🚀 TaxGenie TML Vendor Portal loaded successfully');
+            console.log('🏢 Company: XYZ Solutions Pvt Ltd');
+            console.log('📊 Current Plan: Basic');
+            console.log('⏰ Deadline: 30th September 2025 (41 days remaining)');
+            console.log('🎯 Self-Deployment Support: Available with FREE resources');
+            console.log('🤖 ASN AI Specialist: Advanced AI assistant available for launch');
+            console.log('👨‍💼 Human Specialist Support: 30 min free consultation available');
+        });
+
+        // Switch/Toggle Styles for Notification Preferences
+        var switchStyle = document.createElement('style');
+        switchStyle.textContent = 
+            '.switch { position: relative; display: inline-block; width: 50px; height: 24px; }' +
+            '.switch input { opacity: 0; width: 0; height: 0; }' +
+            '.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: var(--transition); border-radius: 24px; }' +
+            '.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: var(--transition); border-radius: 50%; }' +
+            'input:checked + .slider { background-color: var(--taxgenie-secondary); }' +
+            'input:checked + .slider:before { transform: translateX(26px); }';
+        document.head.appendChild(switchStyle);
+    </script>
+</body>
+</html>

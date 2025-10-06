@@ -1,0 +1,11 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <h2 class="modal-title">{{ data.title }}</h2>
+        <p>{{ data.message }}</p>
+    </div>
+    <div class="text-center">
+        <button *ngFor="let btn of data.buttons" [ngClass]="['btn', 'me-1', 'btn-' + btn.color]" (click)="onClick(btn.value)">
+            {{ btn.text }}
+        </button>
+    </div>
+</div>

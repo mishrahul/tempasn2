@@ -1,0 +1,112 @@
+<div id="authContainer" class="auth-container">
+    <div id="signUpForm" class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo"></div>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join TaxGenie Multi-OEM Portal</p>
+            <div class="multi-oem-badge">One Account, Multiple OEMs</div>
+        </div>
+    
+        <form [formGroup]="signUpForm" (ngSubmit)="handleSignUp()">
+            <!-- Company Name -->
+            <div class="form-section">
+                <label class="form-label">Company Name</label>
+                <div class="input-group-class">
+                    <span class="input-icon">🏢</span>
+                    <input type="text" formControlName="companyName" class="auth-input input-with-icon" placeholder="Enter company name" required>
+                </div>
+                <div *ngIf="signUpForm.controls['companyName'].invalid && signUpForm.controls['companyName'].touched" class="error-message">
+                    Company Name is required
+                </div>
+            </div>
+    
+            <!-- PAN Number -->
+            <div class="form-section">
+                <label class="form-label">PAN Number</label>
+                <div class="input-group-class">
+                    <span class="input-icon">📋</span>
+                    <input type="text" formControlName="panNumber" class="auth-input input-with-icon" appUppercase placeholder="Enter PAN number" required pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" maxlength="10" title="Please enter valid PAN format">
+                </div>
+                <div *ngIf="signUpForm.controls['panNumber'].invalid && signUpForm.controls['panNumber'].touched" class="error-message">
+                    Invalid PAN Number format
+                </div>
+            </div>
+    
+            <!-- Contact Person -->
+            <div class="form-section">
+                <label class="form-label">First Name</label>
+                <div class="input-group-class">
+                    <span class="input-icon">👤</span>
+                    <input type="text" formControlName="firstName" class="auth-input input-with-icon" placeholder="Enter first name" required>
+                </div>
+                <div *ngIf="signUpForm.controls['firstName'].invalid && signUpForm.controls['firstName'].touched" class="error-message">
+                    First Name is required
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Last Name</label>
+                <div class="input-group-class">
+                    <span class="input-icon">👤</span>
+                    <input type="text" formControlName="lastName" class="auth-input input-with-icon" placeholder="Enter last name" required>
+                </div>
+                <div *ngIf="signUpForm.controls['lastName'].invalid && signUpForm.controls['lastName'].touched" class="error-message">
+                    Last Name is required
+                </div>
+            </div>
+    
+            <!-- Company Email -->
+            <div class="form-section">
+                <label class="form-label">Company Email</label>
+                <div class="input-group-class">
+                    <span class="input-icon">📧</span>
+                    <input type="email" formControlName="email" class="auth-input input-with-icon" placeholder="Enter company email" required>
+                </div>
+                <div *ngIf="signUpForm.controls['email'].invalid && signUpForm.controls['email'].touched" class="error-message">
+                    Please enter a valid email address
+                </div>
+            </div>
+    
+            <!-- Mobile Number -->
+            <div class="form-section">
+                <label class="form-label">Mobile Number</label>
+                <div class="input-group-class">
+                    <span class="input-icon">📱</span>
+                    <input type="tel" formControlName="mobileNumber" class="auth-input input-with-icon" placeholder="Enter mobile number" required pattern="[0-9]{10}" maxlength="10" title="Please enter 10 digit mobile number">
+                </div>
+                <div *ngIf="signUpForm.controls['mobileNumber'].invalid && signUpForm.controls['mobileNumber'].touched" class="error-message">
+                    Please enter a valid 10-digit mobile number
+                </div>
+            </div>
+    
+            <!-- Password -->
+            <div class="form-section">
+                <label class="form-label">Create Password</label>
+                <div class="input-group-class">
+                    <span class="input-icon">🔒</span>
+                    <input [type]="isPasswordVisible ? 'text' : 'password'" formControlName="password" class="auth-input input-with-icon" placeholder="Enter password" required>
+                    <button type="button" class="password-toggle" (click)="togglePassword()">👁️</button>
+                </div>
+                <div *ngIf="signUpForm.controls['password'].invalid && signUpForm.controls['password'].touched" class="error-message">
+                    Password is required and must be at least 8 characters long
+                </div>
+            </div>
+    
+            <button type="submit"
+                class="btn btn-primary btn-full d-block fs-6"
+                [disabled]="signUpForm.invalid"
+                [class.loading]="isLoading">
+                <span class="spinner" [class.hidden]="!isLoading"></span>
+                <span>{{ isLoading ? 'Create Account...' : 'Create Account' }}</span>
+            </button>
+        </form>
+    
+        <div class="auth-divider">
+            <span>OR</span>
+        </div>
+    
+        <button class="btn btn-ghost btn-full" routerLink="/sign-in">
+            Already have an account? Sign In
+        </button>
+    </div>
+</div>

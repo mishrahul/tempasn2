@@ -1,0 +1,63 @@
+<div id="authContainer" class="auth-container">
+    <div id="signInForm" class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo"></div>
+            <p class="auth-subtitle mt-4">Multi-OEM Vendor Portal</p>
+            <div class="multi-oem-badge">Unified Access to All OEMs</div>
+        </div>
+
+        <form [formGroup]="signInForm" (ngSubmit)="handleSignIn()">
+            <div class="form-section">
+                <label class="form-label" for="signInEmail">Email Address</label>
+                <div class="input-group-class">
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="signInEmail" class="auth-input input-with-icon" placeholder="Enter your email" formControlName="email">
+                </div>
+                <div *ngIf="signInForm.controls['email'].touched && signInForm.controls['email'].invalid" class="error-message">
+                    Please enter a valid email address
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="signInPassword">Password</label>
+                <div class="input-group-class">
+                    <span class="input-icon">🔒</span>
+                    <input [type]="isPasswordVisible ? 'text' : 'password'" id="signInPassword" class="auth-input input-with-icon" placeholder="Enter your password" formControlName="password">
+                    <button type="button" class="password-toggle" (click)="togglePassword()">👁️</button>
+                </div>
+                <div *ngIf="signInForm.controls['password'].touched && signInForm.controls['password'].invalid" class="error-message">
+                    Invalid password
+                </div>
+            </div>
+
+            <div class="auth-actions">
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe" formControlName="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                </div>
+                <a href="#" class="forgot-link" (click)="showForgotPassword()">Forgot password?</a>
+            </div>
+
+            <button type="submit"
+                class="btn btn-primary btn-full d-block fs-6"
+                [disabled]="signInForm.invalid"
+                [class.loading]="isLoading">
+                <span class="spinner" [class.hidden]="!isLoading"></span>
+                <span>{{ isLoading ? 'Sign In...' : 'Sign In' }}</span>
+            </button>
+        </form>
+
+        <div class="auth-divider">
+            <span>OR</span>
+        </div>
+
+        <button class="btn btn-ghost btn-full" routerLink="/sign-up">
+            Create New Account
+        </button>
+
+        <div class="auth-footer" style="margin-top: 2rem;">
+            <p>Access <strong>TML</strong>, <strong>Mahindra</strong>, <strong>TAFE</strong> & more with one account</p>
+            <p style="margin-top: 1rem;">By signing in, you agree to our <a href="#" (click)="showTerms()">Terms of Service</a> and <a href="#" (click)="showPrivacy()">Privacy Policy</a></p>
+        </div>
+    </div>
+</div>

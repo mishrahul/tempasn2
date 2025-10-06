@@ -1,0 +1,31 @@
+<div class="content-area">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Subscription Plans</h1>
+        <p class="dashboard-subtitle">Choose the plan that best fits your business needs</p>
+    </div>
+
+    <app-alert 
+        type="info" 
+        note="Current Plan"
+        message="{{currentUser?.currentPlan}} - Upgrade to Professional or Enterprise for enhanced features and priority support.">
+    </app-alert>
+
+    <div class="plans-grid">
+        <app-plan-card 
+            *ngFor="let plan of plans"
+            [plan]="plan"
+            [isCurrentPlan]="isCurrentPlan(plan)"
+            [loading]="loadingPlanId === plan.id"
+            (upgrade)="upgradePlan($event)">
+        </app-plan-card>
+    </div>
+
+    <!-- Contact for Custom Plans -->
+    <div class="custom-solution">
+        <h3>Need a Custom Solution?</h3>
+        <p>Contact our sales team for enterprise-grade custom implementations and volume discounts.</p>
+        <button class="btn btn-primary" (click)="contactSales()">
+            <span>📞</span> Contact Sales Team
+        </button>
+    </div>
+</div>

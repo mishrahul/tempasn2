@@ -1,0 +1,119 @@
+<!-- AI Specialist Page with Integrated Chat -->
+<div class="content-area">
+  <!-- Landing Page (shown when chat is not active) -->
+  <div *ngIf="!showChatInterface">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">TaxGenie ASN AI Specialist</h1>
+      <p class="dashboard-subtitle">Advanced AI-powered assistant for intelligent ASN 2.1 implementation and real-time expert guidance</p>
+    </div>
+
+    <!-- AI Hero Section -->
+    <div class="ai-hero-section">
+      <div class="ai-icon">🤖</div>
+      <h2>TaxGenie ASN Expert AI Assistant</h2>
+      <p>Experience the future of ASN 2.1 implementation with our advanced AI assistant. Get expert guidance, real-time support, and intelligent solutions for all your ERP integration needs.</p>
+      <button class="btn btn-hero" (click)="launchAISpecialist()">
+        🚀 Launch AI Specialist
+      </button>
+    </div>
+
+    <app-alert
+      type="info"
+      node="Intelligent AI Integration"
+      message="Our ASN AI Specialist is powered by advanced machine learning and connects directly with TaxGenie's knowledge base for real-time, accurate responses.">
+    </app-alert>
+
+    <!-- Feature Grid -->
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Advanced AI Intelligence</h3>
+        <p>Powered by state-of-the-art natural language processing and machine learning algorithms for intelligent responses</p>
+        <ul class="feature-list">
+          <li>✓ Natural language understanding</li>
+          <li>✓ Context-aware responses</li>
+          <li>✓ Learning from interactions</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Real-time Knowledge Base</h3>
+        <p>Connected to TaxGenie's comprehensive ASN 2.1 knowledge repository and latest updates</p>
+        <ul class="feature-list">
+          <li>✓ Latest ASN 2.1 documentation</li>
+          <li>✓ ERP integration guides</li>
+          <li>✓ Best practices & troubleshooting</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🕰</div>
+        <h3>24/7 Availability</h3>
+        <p>Round-the-clock assistance with instant responses and continuous learning capabilities</p>
+        <ul class="feature-list">
+          <li>✓ Instant response times</li>
+          <li>✓ No waiting periods</li>
+          <li>✓ Always learning & improving</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AI Capabilities -->
+    <div class="capabilities-section">
+      <h3>🎯 AI Specialist Capabilities</h3>
+      <div class="capabilities-grid">
+        <div class="capability-item">
+          <div class="capability-icon">🚀</div>
+          <h4>ASN 2.1 Implementation</h4>
+          <p>Step-by-step guidance for complete ASN 2.1 setup, configuration, and deployment</p>
+        </div>
+        <div class="capability-item">
+          <div class="capability-icon">🔗</div>
+          <h4>ERP Integration</h4>
+          <p>Expert assistance for SAP, Tally, Oracle, and custom ERP system integrations</p>
+        </div>
+        <div class="capability-item">
+          <div class="capability-icon">🛠</div>
+          <h4>Troubleshooting</h4>
+          <p>Intelligent problem diagnosis and resolution for technical issues</p>
+        </div>
+        <div class="capability-item">
+          <div class="capability-icon">📊</div>
+          <h4>Best Practices</h4>
+          <p>Industry best practices and optimization recommendations</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Launch Section -->
+    <div class="launch-section">
+      <h3>Ready to Experience AI-Powered ASN Assistance?</h3>
+      <p>Launch the TaxGenie ASN AI Specialist for instant, intelligent support</p>
+      <div class="launch-actions">
+        <button class="btn btn-primary" (click)="launchAISpecialist()">
+          🤖 Launch AI Specialist
+        </button>
+        <button class="btn btn-secondary" (click)="showDemo()">
+          🎥 View Demo
+        </button>
+      </div>
+      <div class="launch-note">
+        <p><strong>Note:</strong> The AI Specialist is now integrated directly into this page for the best experience.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Integrated AI Chat Interface -->
+  <div *ngIf="showChatInterface" class="chat-interface-container">
+    <div class="chat-header-bar">
+      <h2>🤖 TaxGenie ASN Expert AI - Active Session</h2>
+      <button class="btn btn-secondary" (click)="closeChatInterface()">
+        ← Back to Overview
+      </button>
+    </div>
+
+    <!-- AI Chat Component -->
+    <app-ai-chat></app-ai-chat>
+  </div>
+</div>

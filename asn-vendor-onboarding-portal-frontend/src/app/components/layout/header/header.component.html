@@ -1,0 +1,59 @@
+<header class="header">
+    <div class="header-content">
+        <div class="brand-section">
+            <a routerLink="/dashboard" class="taxgenie-logo">
+                <img src="../../../../assets/taxgenie-logo.png" alt="TaxGenie" height="40">
+            </a>
+            <div class="portal-badge">{{selectedOEM}} Vendor Portal</div>
+             <button class="btn btn-secondary" routerLink="/oem-portals">
+                Switch OEM
+            </button>
+        </div>
+        
+        <nav class="header-nav">
+            <a routerLink="/dashboard" 
+                routerLinkActive="active" 
+                class="nav-link"
+                [routerLinkActiveOptions]="{exact: true}">
+            Dashboard
+            </a>
+            <a routerLink="/plans" 
+                routerLinkActive="active" 
+                class="nav-link">
+            Plans
+            </a>
+            <a routerLink="/settings" 
+                routerLinkActive="active" 
+                class="nav-link">
+            Settings
+            </a>
+        </nav>
+        
+        <div class="user-menu">
+            <div class="user-trigger" (click)="toggleUserMenu()">
+                <div class="user-avatar">{{getUserInitials()}}</div>
+                <div class="user-info" *ngIf="user">
+                    <h4>{{user.companyName}}</h4>
+                    <p>{{user.currentPlan}} Plan</p>
+                </div>
+            </div>
+            
+            <!-- User Menu Dropdown -->
+            <div class="user-dropdown" *ngIf="showUserMenu" (clickOutside)="closeUserMenu()">
+                <a routerLink="/settings" class="dropdown-item">
+                    <span>👤</span> Profile Settings
+                </a>
+                <a routerLink="/plans" class="dropdown-item">
+                    <span>📊</span> Subscription Plans
+                </a>
+                <a routerLink="/oem-portals" class="dropdown-item">
+                    <span>🔄</span> Switch OEM
+                </a>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" (click)="logout()">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+</header>

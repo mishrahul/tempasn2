@@ -1,0 +1,44 @@
+<!-- OEM Selection Container - After Login -->
+    <div id="oemSelection" class="oem-selection-container">
+        <div class="oem-selection-card">
+            <div class="welcome-user">
+                <h3>👋 Welcome!</h3>
+                <p>Select the OEM portal you'd like to access</p>
+                <div class="user-info-compact">
+                    <strong id="welcomeUserName">{{ userName }}</strong> | <span id="welcomeUserEmail">{{ userEmail }}</span>
+                </div>
+            </div>
+
+            <div class="oem-header">
+                <img src="../../../../assets/taxgenie-logo.png" class="my-4" alt="TaxGenie" height="80">
+                <h1 class="oem-main-title">Choose Your OEM Portal</h1>
+                <p class="oem-main-subtitle">Access TML, Mahindra, TAFE & More</p>
+            </div>
+
+            <div class="oem-grid">
+                <!-- Dynamically generated OEM cards -->
+                <div *ngFor="let oem of oems" class="oem-card" [class.coming-soon]="oem.isComingSoon" [class.no-access]="oem.noAccess" (click)="selectOEM(oem)" [attr.data-oem]="oem.id">                
+                    <div class="oem-logo" [style.background]="oem.logoBackground">{{ oem.shortName }}</div>
+                    <h3 class="oem-name">{{ oem.fullName }}</h3>
+                    <p class="oem-full-name">{{ oem.fullName }}</p>
+                    <ul class="oem-features">
+                        <li *ngFor="let feature of oem.features">{{ feature }}</li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <div class="user-actions">
+                <button class="btn btn-secondary" (click)="refreshOEMAccess()">
+                    🔄 Refresh Access
+                </button>
+                <button class="btn btn-ghost" (click)="handleLogout()">
+                    🚪 Logout
+                </button>
+            </div>
+
+            <div class="auth-footer" style="margin-top: 2rem;">
+                <p>Powered by <strong>TaxGenie</strong> - Advanced ASN & ERP Integration Platform</p>
+            </div>
+        </div>
+    </div>

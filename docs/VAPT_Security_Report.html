@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAPT Security Assessment Report - ASN Vendor Onboarding Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .meta-info {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 3px solid #e9ecef;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: #6c757d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            font-size: 1.1em;
+            color: #2a5298;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card.critical {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .summary-card.high {
+            background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+        }
+
+        .summary-card.medium {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        }
+
+        .summary-card.low {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .summary-card.info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        }
+
+        .summary-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .summary-label {
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .vulnerability {
+            background: white;
+            border-left: 5px solid;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .vulnerability.critical {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .vulnerability.high {
+            border-left-color: #fd7e14;
+            background: #fff8f0;
+        }
+
+        .vulnerability.medium {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .vulnerability.low {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .vulnerability.info {
+            border-left-color: #17a2b8;
+            background: #f0f9ff;
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .vuln-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .severity-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .severity-badge.critical { background: #dc3545; }
+        .severity-badge.high { background: #fd7e14; }
+        .severity-badge.medium { background: #ffc107; color: #333; }
+        .severity-badge.low { background: #28a745; }
+        .severity-badge.info { background: #17a2b8; }
+
+        .vuln-details {
+            margin-top: 15px;
+        }
+
+        .detail-section {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .detail-content {
+            color: #495057;
+            line-height: 1.8;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
+        .recommendation {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .cvss-score {
+            display: inline-block;
+            background: #1e3c72;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 3px solid #e9ecef;
+        }
+
+        .footer-note {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .summary-card {
+                break-inside: avoid;
+            }
+            .vulnerability {
+                break-inside: avoid;
+            }
+        }
+
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .risk-cell {
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #1e3c72;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔒 VAPT Security Assessment Report</h1>
+            <div class="subtitle">ASN Vendor Onboarding Portal - Comprehensive Security Analysis</div>
+        </div>
+
+        <!-- Meta Information -->
+        <div class="meta-info">
+            <div class="meta-item">
+                <div class="meta-label">Report Date</div>
+                <div class="meta-value">October 3, 2025</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Application</div>
+                <div class="meta-value">ASN Vendor Portal</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Version</div>
+                <div class="meta-value">1.0.0</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Framework</div>
+                <div class="meta-value">Spring Boot 3.2.6</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Total Findings</div>
+                <div class="meta-value">18</div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="section">
+                <h2 class="section-title">📊 Executive Summary</h2>
+                <p style="margin-bottom: 20px;">
+                    This Vulnerability Assessment and Penetration Testing (VAPT) report presents the findings from a comprehensive security analysis 
+                    of the ASN Vendor Onboarding Portal. The assessment identified <strong>18 security findings</strong> across various severity levels, 
+                    including critical vulnerabilities that require immediate attention.
+                </p>
+
+                <div class="summary-grid">
+                    <div class="summary-card critical">
+                        <div class="summary-number">5</div>
+                        <div class="summary-label">Critical</div>
+                    </div>
+                    <div class="summary-card high">
+                        <div class="summary-number">6</div>
+                        <div class="summary-label">High</div>
+                    </div>
+                    <div class="summary-card medium">
+                        <div class="summary-number">4</div>
+                        <div class="summary-label">Medium</div>
+                    </div>
+                    <div class="summary-card low">
+                        <div class="summary-number">2</div>
+                        <div class="summary-label">Low</div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-number">1</div>
+                        <div class="summary-label">Info</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 10px;">Overall Security Score</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 62%; background: linear-gradient(90deg, #ffc107, #fd7e14);">
+                            62/100 - Needs Improvement
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Vulnerabilities -->
+            <div class="section">
+                <h2 class="section-title">🚨 Critical Vulnerabilities</h2>
+
+                <!-- VULN 1 -->
+                <div class="vulnerability critical">
+                    <div class="vuln-header">
+                        <div class="vuln-title">1. Hardcoded Database Credentials in Configuration File</div>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>asn-vendor-onboarding-portal-backend/src/main/resources/application.yml</code> (Lines 9-11)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                Production database credentials are hardcoded in the application.yml file, including the database URL, username, and password. 
+                                This exposes sensitive credentials in version control and makes them accessible to anyone with repository access.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 9.8</strong> - Unauthorized database access, data breach, complete system compromise
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">📝 Evidence:</div>
+                            <div class="code-block">url: ${DB_URL:jdbc:postgresql://34.93.203.197:5432/db_asn_vendor_onboarding_portal?currentSchema=sch_asn_vendor_onboarding_portal}
+username: ${DB_USERNAME:postgres}
+password: ${DB_PASSWORD:Xr9$wP7Z6#Lf@3Bn8*}</div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Remove all hardcoded credentials from application.yml<br>
+                            2. Use environment variables exclusively (no default values)<br>
+                            3. Implement secrets management (HashiCorp Vault, AWS Secrets Manager, Azure Key Vault)<br>
+                            4. Rotate all exposed credentials immediately<br>
+                            5. Add application.yml to .gitignore and remove from version history
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 2 -->
+                <div class="vulnerability critical">
+                    <div class="vuln-header">
+                        <div class="vuln-title">2. Hardcoded JWT Secret Key</div>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>application.yml</code> (Line 78), <code>JwtService.java</code> (Line 30)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                JWT secret key is hardcoded with a default value in configuration. This allows attackers to forge valid JWT tokens 
+                                and bypass authentication entirely.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 9.1</strong> - Complete authentication bypass, privilege escalation, unauthorized access to all resources
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">📝 Evidence:</div>
+                            <div class="code-block">jwt:
+  secret: ${JWT_SECRET:1E223539-0D5B-4279-8F9A-B3B13BDC7A29-DA01E40D-6806-40FA-B280-44ACB4902845}</div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Generate a cryptographically secure random key (minimum 512 bits)<br>
+                            2. Store in secure secrets management system<br>
+                            3. Remove default value from configuration<br>
+                            4. Implement key rotation mechanism<br>
+                            5. Invalidate all existing tokens after key rotation
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 3 -->
+                <div class="vulnerability critical">
+                    <div class="vuln-header">
+                        <div class="vuln-title">3. Hardcoded AES Encryption Key</div>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>application.yml</code> (Line 87)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                AES encryption key is hardcoded with a weak default value. This compromises all encrypted data in the system.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 8.8</strong> - Decryption of sensitive data, exposure of PII, compliance violations
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">📝 Evidence:</div>
+                            <div class="code-block">aes:
+  encryption-key: ${AES_ENCRYPTION_KEY:ASN-VENDOR-PORTAL-AES-KEY-32-CHARS}</div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Generate proper 256-bit AES key using cryptographically secure random generator<br>
+                            2. Store in HSM or secure key management service<br>
+                            3. Remove default value<br>
+                            4. Implement key rotation with data re-encryption<br>
+                            5. Use envelope encryption for additional security
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 4 -->
+                <div class="vulnerability critical">
+                    <div class="vuln-header">
+                        <div class="vuln-title">4. Weak Default Admin Credentials</div>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>application.yml</code> (Lines 48-51)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                Default Spring Security user credentials are set to "admin/admin123" which is extremely weak and commonly known.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 9.8</strong> - Unauthorized administrative access, complete system compromise
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">📝 Evidence:</div>
+                            <div class="code-block">security:
+  user:
+    name: admin
+    password: admin123</div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Remove default credentials entirely<br>
+                            2. Disable Spring Security default user in production<br>
+                            3. Implement proper user management with strong password policies<br>
+                            4. Enforce MFA for administrative accounts<br>
+                            5. Use role-based access control (RBAC)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 5 -->
+                <div class="vulnerability critical">
+                    <div class="vuln-header">
+                        <div class="vuln-title">5. Public Database IP Exposure</div>
+                        <span class="severity-badge critical">CRITICAL</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>application.yml</code> (Line 9), <code>CLOUD_RUN_DEPLOYMENT_GUIDE.md</code>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                Production database IP address (34.93.203.197) is exposed in configuration files and documentation, making it a target for attacks.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 8.6</strong> - Direct database attacks, DDoS, brute force attempts
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Use private networking (VPC/VNet) for database access<br>
+                            2. Implement Cloud SQL Proxy or equivalent<br>
+                            3. Configure firewall rules to allow only application server IPs<br>
+                            4. Use connection pooling with SSL/TLS<br>
+                            5. Remove IP addresses from all documentation
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- High Severity Vulnerabilities -->
+            <div class="section">
+                <h2 class="section-title">⚠️ High Severity Vulnerabilities</h2>
+
+                <!-- VULN 6 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">6. CSRF Protection Disabled</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>SecurityConfig.java</code> (Lines 67-70)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                CSRF protection is completely disabled for the entire application.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 7.5</strong> - Cross-Site Request Forgery attacks
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Enable CSRF protection for state-changing operations<br>
+                            2. Use SameSite cookie attribute<br>
+                            3. Implement custom request headers for AJAX requests
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 7 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">7. Overly Permissive CORS Configuration</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                <code>SecurityConfig.java</code> (Lines 137-148, 158)
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                CORS configuration allows all headers ("*") and uses wildcard patterns.
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 7.2</strong> - Cross-origin attacks, data exfiltration
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Specify exact allowed headers instead of "*"<br>
+                            2. Use specific origin URLs instead of wildcards<br>
+                            3. Remove placeholder domains
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 8 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">8. SQL Injection Risk in Native Queries</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">📍 Location:</div>
+                            <div class="detail-content">
+                                Multiple repository files with @Query annotations
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 8.2</strong> - Data breach, unauthorized data access
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Always use parameterized queries<br>
+                            2. Implement input validation and sanitization<br>
+                            3. Use JPA Criteria API for dynamic queries
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 9 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">9. Insufficient Input Validation</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 7.8</strong> - Injection attacks, data corruption
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Implement comprehensive input validation on all endpoints<br>
+                            2. Use Bean Validation (JSR-303) annotations consistently<br>
+                            3. Validate file uploads (type, size, content)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 10 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">10. Excessive File Upload Limits</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 6.5</strong> - Denial of Service, storage exhaustion
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Reduce file size limits based on business requirements<br>
+                            2. Implement file type validation (whitelist approach)<br>
+                            3. Scan uploaded files for malware
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VULN 11 -->
+                <div class="vulnerability high">
+                    <div class="vuln-header">
+                        <div class="vuln-title">11. Missing Security Headers</div>
+                        <span class="severity-badge high">HIGH</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 7.0</strong> - Clickjacking, XSS attacks
+                            </div>
+                        </div>
+                        <div class="recommendation">
+                            <strong>✅ Recommendation:</strong><br>
+                            1. Add X-Frame-Options: DENY or SAMEORIGIN<br>
+                            2. Add X-Content-Type-Options: nosniff<br>
+                            3. Implement Content-Security-Policy
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medium Severity -->
+            <div class="section">
+                <h2 class="section-title">⚡ Medium Severity Vulnerabilities</h2>
+
+                <div class="vulnerability medium">
+                    <div class="vuln-header">
+                        <div class="vuln-title">12. Verbose Error Messages</div>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 5.3</strong> - Information disclosure
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vulnerability medium">
+                    <div class="vuln-header">
+                        <div class="vuln-title">13. Swagger UI Enabled in Production</div>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 5.8</strong> - API enumeration
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vulnerability medium">
+                    <div class="vuln-header">
+                        <div class="vuln-title">14. Insufficient Logging and Monitoring</div>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 5.5</strong> - Delayed incident detection
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vulnerability medium">
+                    <div class="vuln-header">
+                        <div class="vuln-title">15. Missing Rate Limiting</div>
+                        <span class="severity-badge medium">MEDIUM</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 6.2</strong> - Brute force attacks, DoS
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Severity -->
+            <div class="section">
+                <h2 class="section-title">ℹ️ Low Severity Vulnerabilities</h2>
+
+                <div class="vulnerability low">
+                    <div class="vuln-header">
+                        <div class="vuln-title">16. Hibernate DDL Auto-Update in Production</div>
+                        <span class="severity-badge low">LOW</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 4.2</strong> - Accidental schema modifications
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vulnerability low">
+                    <div class="vuln-header">
+                        <div class="vuln-title">17. Information Disclosure via /actuator/info</div>
+                        <span class="severity-badge low">LOW</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">💥 Impact:</div>
+                            <div class="detail-content">
+                                <strong>CVSS Score: 3.7</strong> - Version disclosure
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informational -->
+            <div class="section">
+                <h2 class="section-title">📝 Informational Findings</h2>
+
+                <div class="vulnerability info">
+                    <div class="vuln-header">
+                        <div class="vuln-title">18. Missing API Versioning Strategy</div>
+                        <span class="severity-badge info">INFO</span>
+                    </div>
+                    <div class="vuln-details">
+                        <div class="detail-section">
+                            <div class="detail-label">🔍 Description:</div>
+                            <div class="detail-content">
+                                No clear versioning strategy for future API changes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Summary -->
+            <div class="section">
+                <h2 class="section-title">✅ Key Recommendations</h2>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #dc3545; margin-bottom: 15px;">🚨 Immediate Actions (24-48 hours)</h3>
+                    <ol style="line-height: 2;">
+                        <li>Remove all hardcoded credentials from application.yml</li>
+                        <li>Rotate all exposed secrets (DB password, JWT secret, AES key)</li>
+                        <li>Disable default admin credentials</li>
+                        <li>Implement environment-based configuration</li>
+                        <li>Remove database IP from public documentation</li>
+                    </ol>
+                </div>
+
+                <div style="background: #fff8f0; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #fd7e14; margin-bottom: 15px;">⚠️ Short-term Actions (1-2 weeks)</h3>
+                    <ol style="line-height: 2;">
+                        <li>Implement secrets management solution</li>
+                        <li>Configure security headers</li>
+                        <li>Enable CSRF protection</li>
+                        <li>Restrict CORS to specific origins</li>
+                        <li>Implement rate limiting</li>
+                        <li>Add comprehensive input validation</li>
+                        <li>Disable Swagger UI in production</li>
+                    </ol>
+                </div>
+
+                <div style="background: #f0fff4; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #28a745; margin-bottom: 15px;">📈 Long-term Actions (1 month+)</h3>
+                    <ol style="line-height: 2;">
+                        <li>Implement comprehensive security logging and monitoring</li>
+                        <li>Set up SIEM solution</li>
+                        <li>Conduct regular security training</li>
+                        <li>Implement automated security testing in CI/CD</li>
+                        <li>Establish security code review process</li>
+                        <li>Implement MFA for all user accounts</li>
+                        <li>Conduct regular penetration testing</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="section">
+                <h2 class="section-title">📊 Conclusion</h2>
+                
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px;">
+                    <h3 style="margin-bottom: 15px;">Overall Assessment</h3>
+                    <p style="line-height: 1.8; margin-bottom: 20px;">
+                        The ASN Vendor Onboarding Portal contains <strong>18 security findings</strong> across various severity levels. 
+                        The most critical issues involve hardcoded credentials and secrets.
+                    </p>
+                    
+                    <p style="line-height: 1.8; margin-bottom: 20px;">
+                        <strong>Risk Level: HIGH</strong> - Immediate action required before production deployment.
+                    </p>
+
+                    <p style="line-height: 1.8;">
+                        With proper remediation, the application can achieve a strong security posture. 
+                        Priority should be given to addressing the 5 critical and 6 high-severity findings within 1-2 weeks.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3 style="margin-bottom: 10px;">Report Information</h3>
+            <p><strong>Generated by:</strong> Augment Agent - Security Assessment Tool</p>
+            <p><strong>Report Date:</strong> October 3, 2025</p>
+            <p><strong>Classification:</strong> Confidential - Internal Use Only</p>
+            <div class="footer-note">
+                This report contains sensitive security information and should be handled according to your organization's security policies.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

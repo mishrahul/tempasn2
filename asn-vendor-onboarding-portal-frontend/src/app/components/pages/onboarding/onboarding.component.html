@@ -1,0 +1,285 @@
+
+    <!-- Onboarding Page -->
+    <div id="onboarding" class="page">
+        <div class="content-area">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">ASN 2.1 Onboarding</h1>
+                <p class="dashboard-subtitle">
+                    Complete your implementation step by step
+                </p>
+            </div>
+            
+            <app-alert 
+                type="success"
+                icon="🎉"
+                note="Step 1 Completed"
+                message="Account setup and vendor verification successful. Ready to proceed with ASN 2.1 confirmation.">
+            </app-alert>
+
+            <!-- Dynamic Content Area -->
+            <div id="onboardingContent">
+                <!-- Step 2: Confirmation (Default) -->
+                <div id="confirmationStep">
+                    <div class="asn-card">
+                    <h4 class="asn-step-title">
+                        Current Step: {{currentStepName}}
+                    </h4>
+                    <p class="asn-step-subtitle">
+                        Review your vendor details and confirm ASN 2.1 activation
+                        requirements. Next step will be Payment.
+                    </p>
+
+                    <div class="row g-4 mb-4" *ngIf="payment || confirmation">
+                        <div class="col-md-6 d-flex flex-column">
+                            <h5 class="asn-section-title">Company Details</h5>
+                            <div class="asn-section-card flex-grow-1">
+                                <p><strong>Company:</strong> {{user?.companyName}}</p>
+                                <p><strong>PAN:</strong> {{user?.panNumber}}</p>
+                                <p><strong>Contact:</strong> {{user?.contactPerson}}</p>
+                                <p><strong>Email:</strong> {{user?.email}}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex flex-column" *ngIf="confirmation">
+                            <h5 class="asn-section-title">GSTIN Details</h5>
+                            <div class="asn-section-card flex-grow-1">
+                                <p><strong>Maharashtra:</strong> 27AAEPM1234C1ZV (V00254)</p>
+                                <p><strong>Karnataka:</strong> 29AABFR7890K1ZW (V00675)</p>
+                                <p><strong>Goa:</strong> 30AABFR7890K1ZW (V00546)</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 d-flex flex-column" *ngIf="payment">
+                            <h5 class="asn-section-title">Pricing Information</h5>
+                            <div class="asn-section-card bg-green flex-grow-1">
+                                <p><strong>Plan:</strong> Basic Plan</p>
+                                <p><strong>Annual Fee:</strong> ₹12,000</p>
+                                <p><strong>Setup Fee:</strong> ₹5,000</p>
+                                <p><strong>GST (18%):</strong> ₹3,060</p>
+                                <h3 class="mt-4 mb-0">Setup Fee: ₹20,060</h3>
+                            </div>
+                        </div>
+                    </div>
+                         
+                    
+                    <div class="row g-4 mb-4" *ngIf="deployment">
+                        <div class="col-md-6">
+                            <div class="plan-card">
+                                <h4 class="asn-section-title">🛠️ Self-Deployment</h4>
+                                <p class="asn-step-subtitle">
+                                Deploy independently with our comprehensive resources and
+                                support.
+                                </p>
+                                <ul class="plan-list">
+                                <li>✓ Complete documentation</li>
+                                <li>✓ Video tutorials</li>
+                                <li>✓ 30-min free consultation</li>
+                                <li>✓ Email support</li>
+                                </ul>
+                                <button
+                                class="btn btn-secondary w-100"
+                                (click)="selectDeployment('self')"
+                                >
+                                Select Self-Deployment
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="plan-card featured">
+                                <h4 class="asn-section-title">👨‍💼 Assisted Implementation</h4>
+                                <p class="asn-step-subtitle">
+                                Professional implementation with dedicated support team.
+                                </p>
+                                <ul class="plan-list">
+                                <li>✓ Dedicated account manager</li>
+                                <li>✓ Professional setup</li>
+                                <li>✓ Priority support</li>
+                                <li>✓ Additional ₹8,000 fee</li>
+                                </ul>
+                                <button
+                                class="btn btn-primary w-100"
+                                (click)="selectDeployment('assisted')"
+                                >
+                                Select Assisted Implementation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn btn-primary btn-lg bg-green px-4 py-3 d-block mx-auto fs-6"
+                        [disabled]="isLoading"
+                        (click)="confirmASN()"
+                        [class.loading]="isLoading"
+                        *ngIf="confirmation"
+                        >
+                        <span class="spinner" [class.hidden]="!isLoading"></span>
+                        <span>{{ isLoading ? 'Processing Confirmation...' : '✅ Confirm ASN 2.1 Activation' }}</span>
+                    </button>
+                    
+                    <button 
+                        class="btn btn-primary bg-blue px-4 py-3 d-block mx-auto fs-6" 
+                        (click)="openPaymentModal()" *ngIf="payment">
+                        <span>💳</span> Pay Now - ₹20,060
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment (Hidden by default) -->
+            <!-- Step 4: Deployment Method Selection (Hidden by default) -->
+
+
+            <!-- Self-Deployment Credentials Form (Hidden by default) -->
+            <div id="selfDeploymentForm" class="deployment-form-container d-none">
+                <div class="form-header">
+                <h2>🛠️ Self-Deployment Setup</h2>
+                <p>
+                    Configure your ASN 2.1 API credentials for independent
+                    implementation
+                </p>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-indicator">
+                <div class="progress-step">
+                    <div class="step-circle step-complete">✓</div>
+                    <span>Payment Complete</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle step-active">2</div>
+                    <span>API Setup</span>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle step-pending">3</div>
+                    <span>Deployment</span>
+                </div>
+                </div>
+
+                <div class="alert alert-info d-flex align-items-center gap-2">
+                <span class="step-icon">ℹ️</span>
+                <div>
+                    <strong>API Credential Creation:</strong> We'll create your
+                    dedicated ASN 2.1 API credentials using Google Apigee platform. This
+                    process typically takes 2-3 minutes.
+                </div>
+                </div>
+
+                <form id="credentialsForm" (ngSubmit)="handleCredentialsSubmission($event)">
+                    <!-- Pre-filled Company Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">📋 Company Information (Pre-filled)</h3>
+                        <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">TML Vendor Name</label>
+                            <input type="text" class="form-control" id="credVendorName" disabled />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vendor Code</label>
+                            <input type="text" class="form-control" id="credVendorCode" disabled />
+                        </div>
+                        </div>
+                        <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">PAN Number</label>
+                            <input type="text" class="form-control" id="credPanNumber" disabled />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Primary GSTIN</label>
+                            <input
+                            type="text"
+                            class="form-control"
+                            id="credGstinNumber"
+                            value="27AAACJ9630N1ZV"
+                            disabled
+                            />
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- e-Sakha Credentials -->
+                    <div class="form-section">
+                        <h3 class="section-title">🔐 e-Sakha Portal Credentials</h3>
+                        <div class="credentials-info">
+                        <h3>🔐 e-Sakha Portal Information</h3>
+                        <ul>
+                            <li>e-Sakha is Tata Motors' vendor portal for supplier management</li>
+                            <li>Your e-Sakha credentials will be used to authenticate API access</li>
+                            <li>These credentials are required for ASN 2.1 integration</li>
+                            <li>Contact TML IT Support if you don't have e-Sakha access</li>
+                        </ul>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">e-Sakha User ID *</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="eSakhaUserId"
+                                placeholder="Enter your e-Sakha username"
+                                autocomplete="on"
+                                required
+                            />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">e-Sakha Password *</label>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="eSakhaPassword"
+                                placeholder="Enter your e-Sakha password"
+                                autocomplete="on"
+                                required
+                            />
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Configuration -->
+                    <div class="form-section">
+                        <h3 class="section-title">⚙️ API Configuration</h3>
+                        <div class="mb-3">
+                        <label class="form-label">Environment</label>
+                        <select class="form-select" id="environment">
+                            <option value="sandbox">Sandbox (Testing)</option>
+                            <option value="production">Production (Live)</option>
+                        </select>
+                        </div>
+                        <div class="mb-3">
+                        <label class="form-label">Webhook URL (Optional)</label>
+                        <input
+                            type="url"
+                            class="form-control"
+                            id="webhookUrl"
+                            placeholder="https://your-system.com/webhook/asn"
+                        />
+                        <small class="text-muted">URL to receive ASN status notifications</small>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex gap-3 mt-4">
+                        <button
+                        type="button"
+                        class="btn btn-secondary w-100"
+                        (click)="goBackToDeployment()"
+                        >
+                        ← Back to Deployment Options
+                        </button>
+                        <button
+                        type="submit"
+                        class="btn btn-primary w-100"
+                        id="submitBtn"
+                        >
+                        🚀 Create API Credentials
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Response Container -->
+                <div id="responseContainer" class="response-container">
+                <div id="responseContent"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>

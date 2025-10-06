@@ -1,0 +1,151 @@
+.content-area {
+  padding: 2rem;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+.onboarding-section {
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius-xl);
+  margin-bottom: 2rem;
+
+  h3 {
+    color: var(--taxgenie-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.details-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+
+  h4 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+}
+
+.detail-item {
+  p {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.confirmation-actions {
+  text-align: center;
+}
+
+
+/* Onboarding Page Styles */
+.step-icon {
+  font-size: 1.5rem;
+}
+
+.asn-card {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-xl);
+  margin-bottom: 2rem;
+}
+
+.asn-step-title {
+  color: var(--taxgenie-primary);
+  margin-bottom: 1rem;
+}
+
+.asn-step-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.asn-section-title {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.asn-section-card {
+  background: #fff;
+  color: var(--text-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.asn-section-card p {
+  margin-bottom: 0.5rem;
+}
+
+.asn-summary-card {
+  background: linear-gradient(135deg, var(--success-start), --success-end);
+  color: #fff;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+
+  .summary-label {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+.bg-green{
+  background: linear-gradient(135deg, var(--success-start), var(--success-end)) !important;
+  color: #fff;
+}
+
+.plan-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  height: 100%;
+
+  &.featured {
+    border: 2px solid var(--taxgenie-primary);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .plan-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+  }
+}

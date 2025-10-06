@@ -1,0 +1,115 @@
+<!-- Simplified AI Chat Interface - Integrated with Vendor Portal -->
+<div class="ai-chat-container">
+  <!-- Connection Status Indicator -->
+  <div class="connection-status" [class.production]="isProductionMode" [class.demo]="!isProductionMode">
+    <div class="status-indicator">
+      <span class="status-dot" [class.online]="isProductionMode" [class.offline]="!isProductionMode"></span>
+      <span class="status-text">{{ isProductionMode ? 'Production Mode' : 'Demo Mode' }}</span>
+    </div>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="messages-container">
+    <div class="messages-wrapper">
+      <!-- Welcome Screen (shown when no messages) -->
+      <div class="welcome-screen" *ngIf="!hasMessages">
+        <div class="welcome-icon"></div>
+        <h2 class="welcome-title">Welcome to AI Assistant</h2>
+        <p class="welcome-subtitle">Ask me anything about tax compliance, vendor onboarding, or ASN processes. I'm here to help!</p>
+        
+        <div class="welcome-suggestions">
+          <div class="suggestion-card" (click)="sendSuggestion('How do I complete vendor onboarding?')">
+            <div class="suggestion-title">
+              <span>📋</span>
+              Vendor Onboarding
+            </div>
+            <p class="suggestion-description">Get help with the vendor registration and onboarding process</p>
+          </div>
+          
+          <div class="suggestion-card" (click)="sendSuggestion('What tax documents do I need to provide?')">
+            <div class="suggestion-title">
+              <span>📄</span>
+              Tax Documentation
+            </div>
+            <p class="suggestion-description">Learn about required tax forms and compliance documents</p>
+          </div>
+          
+          <div class="suggestion-card" (click)="sendSuggestion('How does ASN processing work?')">
+            <div class="suggestion-title">
+              <span>⚡</span>
+              ASN Processing
+            </div>
+            <p class="suggestion-description">Understand the Advanced Shipping Notice workflow</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div *ngIf="hasMessages">
+        <div *ngFor="let message of messages; trackBy: trackByMessageId" 
+             class="message" 
+             [class.user]="message.sender === 'user'"
+             [class.ai]="message.sender === 'ai'"
+             [class.error]="message.sender === 'error'">
+          
+          <div class="message-avatar" 
+               [class.user]="message.sender === 'user'"
+               [class.ai]="message.sender === 'ai'"
+               [class.error]="message.sender === 'error'">
+          </div>
+          
+          <div class="message-content">
+            <div class="message-bubble" 
+                 [class.user]="message.sender === 'user'"
+                 [class.ai]="message.sender === 'ai'"
+                 [class.error]="message.sender === 'error'">
+              
+              <div class="message-text" [innerHTML]="formatMessage(message.content)"></div>
+              <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" [class.active]="isTyping">
+          <div class="message-avatar ai"></div>
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-wrapper">
+      <div class="input-container">
+        <textarea 
+          class="chat-input"
+          [(ngModel)]="currentMessage"
+          (keydown)="handleKeyDown($event)"
+          [disabled]="isLoading"
+          placeholder="Type your message here..."
+          rows="2"
+          #messageInput>
+        </textarea>
+        
+        <button 
+          class="send-button"
+          (click)="sendMessage()"
+          [disabled]="!currentMessage.trim() || isLoading"
+          type="button">
+          <svg *ngIf="!isLoading" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+          <svg *ngIf="isLoading" class="loading-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

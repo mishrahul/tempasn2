@@ -1,0 +1,297 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+    /* TaxGenie Brand Colors */
+    --taxgenie-primary: #1f4e79;
+    --taxgenie-secondary: #2563eb;
+    --taxgenie-accent: #dc2626;
+    --taxgenie-blue-light: #3b82f6;
+    --taxgenie-blue-dark: #1e40af;
+
+    /* Dynamic OEM Colors - Will be updated via JS */
+    --oem-primary: #1f4e79;
+    --oem-secondary: #2563eb;
+    --oem-accent: #dc2626;
+    
+    /* Extended Palette */
+    --success: #059669;
+    --warning: #d97706;
+    --info: #0891b2;
+    --error: #dc2626;
+    
+    /* Neutrals */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Semantic Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: var(--gray-50);
+    --bg-tertiary: var(--gray-100);
+    --text-primary: var(--gray-900);
+    --text-secondary: var(--gray-600);
+    --text-tertiary: var(--gray-400);
+    --border-light: var(--gray-200);
+    --border-medium: var(--gray-300);
+    
+    /* Effects */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // --success-dark: #047857;  /* darker shade */
+    // --success-light: #a7f3d0; /* lighter shade */
+
+    
+    --success-start: #10bd87;
+    --success-end: #047857;
+    --danger-start: #950a0a;
+    --danger-end: #ff5f5f;
+    --warning-start: #bf7800;
+    --warning-end: #ffd739;
+    
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Common Components btn */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: var(--transition);
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.btn-full {
+    width: 100%;
+  }
+}
+
+// Gradient button mixin
+@mixin gradient-button($start, $end) {
+  background: linear-gradient(135deg, $start, $end);
+  color: white;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+
+  &:hover:not(:disabled) {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+    color: white;
+  }
+}
+
+// Apply gradient buttons
+.btn-primary {
+  @include gradient-button(var(--taxgenie-primary), var(--taxgenie-secondary));
+}
+
+.btn-success {
+  @include gradient-button(var(--success-start), var(--success-end));
+}
+
+.btn-danger {
+  @include gradient-button(var(--danger-start), var(--danger-end));
+}
+
+.btn-warning {
+  @include gradient-button(var(--warning-start), var(--warning-end));
+}
+
+// Non-gradient buttons
+
+.btn-secondary {
+  background: var(--bg-primary);
+  color: var(--taxgenie-primary);
+  border: 2px solid var(--taxgenie-primary);
+  transition: var(--transition);
+
+  &:hover:not(:disabled) {
+    background: var(--taxgenie-primary);
+    color: white;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  transition: var(--transition);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    border-color: var(--border-medium);
+  }
+}
+
+
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: var(--transition);
+  background: var(--bg-primary);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--taxgenie-secondary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.toast-container .ngx-toastr{
+  width: 500px !important;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-ghost:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-medium);
+}
+
+.mat-mdc-dialog-surface{
+  border-radius: 13px !important;
+}
+
+.blurred-backdrop {
+  background: rgba(0, 0, 0, 0.3);   /* semi-transparent overlay */
+  backdrop-filter: blur(6px);       /* 👈 blur effect */
+  -webkit-backdrop-filter: blur(6px); /* Safari support */
+}
+
+.spinner {
+  border: 2px solid #cccccc00;
+  border-top: 2px solid #dfdfdf;
+  border-right: 2px solid #dfdfdf;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}

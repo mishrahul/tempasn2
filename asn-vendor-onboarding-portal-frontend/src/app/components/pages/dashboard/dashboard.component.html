@@ -1,0 +1,72 @@
+<div class="content-area">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Welcome to TaxGenie's Tata Motors ASN 2.1 Portal</h1>
+        <p class="dashboard-subtitle">Your comprehensive solution for Tata Motors ASN 2.1 implementation</p>
+    </div>
+
+    <!-- Critical Alert -->
+    <app-alert 
+        type="warning" 
+        note="Critical Deadline"
+        message="30th September 2025 - ASN 2.1 migration must be completed by this date to ensure continuity of your Auto ASN functionalities.">
+    </app-alert>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <app-stat-card 
+            [value]="stats.progress + '%'"
+            label="Implementation Progress"
+            icon="✅"
+            iconColor="var(--success)">
+        </app-stat-card>
+        
+        <app-stat-card 
+            [value]="stats.completedSteps"
+            label="Completed Steps"
+            icon="📋"
+            iconColor="var(--info)">
+        </app-stat-card>
+        
+        <app-stat-card 
+            [value]="stats.daysRemaining.toString()"
+            label="Days Remaining (Sep 30, 2025)"
+            icon="📅"
+            iconColor="var(--warning)">
+        </app-stat-card>
+        
+        <app-stat-card 
+            [value]="stats.currentPlan"
+            label="Current Plan"
+            icon="📊"
+            iconColor="var(--taxgenie-primary)">
+        </app-stat-card>
+    </div>
+
+    <!-- Progress Section -->
+    <app-progress-section 
+        [progress]="onboardingStepsProgress"
+        [steps]="onboardingSteps"
+        [cardType]="'onboarding'">
+    </app-progress-section>
+    <app-progress-section 
+        [progress]="implementationStepsProgress"
+        [steps]="implementationSteps"
+        [cardType]="'implementation'">
+    </app-progress-section>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="btn btn-primary btn-full" (click)="navigateToOnboarding()">
+            <span>🚀</span> Continue Onboarding
+        </button>
+        <button class="btn btn-secondary btn-full" (click)="navigateToAISpecialist()">
+            <span>🤖</span> Launch AI Specialist
+        </button>
+        <button class="btn btn-success btn-full" (click)="navigateToPlans()">
+            <span>⬆️</span> Upgrade Plan
+        </button>
+        <button class="btn btn-secondary btn-full" routerLink="/oem-portals">
+            <span></span> Switch OEM
+        </button>
+    </div>
+</div>
