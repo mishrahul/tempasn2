@@ -5,6 +5,7 @@ import in.taxgenie.entities.*;
 import in.taxgenie.entities.enums.OnboardingStatus;
 import in.taxgenie.entities.enums.PaymentStatus;
 import in.taxgenie.entities.enums.Environment;
+import in.taxgenie.entities.enums.Status;
 import in.taxgenie.repositories.*;
 import in.taxgenie.services.interfaces.IOnboardingService;
 import in.taxgenie.viewmodels.onboarding.*;
@@ -35,6 +36,202 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     private final ApiCredentialRepository apiCredentialRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final OnboardingEventRepository onboardingEventRepository;
+
+    @Override
+    public VendorRegistrationResponseViewModel registerVendor(VendorRegistrationRequestViewModel request, IAuthContextViewModel auth) {
+        log.info("Registering new vendor: {}", request.getCompanyName());
+
+        try {
+            // Check if PAN already exists
+            if (vendorRepository.findByPanNumber(request.getPanNumber()).isPresent()) {
+                throw new RuntimeException("Vendor with this PAN number already exists");
+            }
+
+            // Check if email already exists (search in primary_contact JSON)
+            // This is a simplified check - in production, you'd want a more robust solution
+
+            // Generate company code (using timestamp + random)
+            Long companyCode = auth.getCompanyCode();
+
+            // Build primary contact JSON
+            String primaryContactJson = String.format("""
+                {
+                    "name": "%s",
+                    "email": "%s",
+                    "mobile": "%s",
+                    "designation": "%s"
+                }""",
+                request.getContactPersonName(),
+                request.getContactEmail(),
+                request.getContactMobile(),
+                request.getContactDesignation() != null ? request.getContactDesignation() : "Primary Contact");
+
+            // Build auth credentials JSON (no password for now - will be set via separate flow)
+            String authCredentialsJson = """
+                {
+                    "password_hash": null,
+                    "mfa_enabled": false,
+                    "mfa_secret": null
+                }""";
+
+            // Create vendor entity
+            Vendor vendor = Vendor.builder()
+                .userId(companyCode) // Using companyCode as userId for now
+                .companyName(request.getCompanyName())
+                .panNumber(request.getPanNumber().toUpperCase())
+                .cinNumber(null) // CIN can be added later via profile update
+                .primaryContact(primaryContactJson)
+                .authCredentials(authCredentialsJson)
+                .status(Status.ACTIVE)
+                .lastActivityAt(LocalDateTime.now())
+                .build();
+
+            vendor.setCompanyCode(companyCode);
+            vendor.setCreatedAt(LocalDateTime.now());
+            vendor.setUpdatedAt(LocalDateTime.now());
+            vendor.setCreatedBy(UUID.randomUUID()); // System user
+            vendor.setUpdatedBy(UUID.randomUUID()); // System user
+
+            // Save vendor
+            vendor = vendorRepository.save(vendor);
+            log.info("Vendor created successfully with ID: {}", vendor.getVendorId());
+
+            // Generate vendor code
+            String vendorCode = "V" + vendor.getVendorId().toString().substring(0, 8).toUpperCase();
+
+            // Build response
+            return VendorRegistrationResponseViewModel.builder()
+                .vendorId(vendor.getVendorId().toString())
+                .vendorCode(vendorCode)
+                .companyName(vendor.getCompanyName())
+                .panNumber(vendor.getPanNumber())
+                .status("ACTIVE")
+                .registeredAt(vendor.getCreatedAt())
+                .primaryContact(VendorRegistrationResponseViewModel.ContactInfoViewModel.builder()
+                    .name(request.getContactPersonName())
+                    .email(request.getContactEmail())
+                    .mobile(request.getContactMobile())
+                    .designation(request.getContactDesignation())
+                    .build())
+                .nextSteps(List.of(
+                    "Complete your company profile",
+                    "Add GSTIN details",
+                    "Select OEM for onboarding",
+                    "Choose subscription plan",
+                    "Complete payment"
+                ))
+                .onboardingStatus(VendorRegistrationResponseViewModel.OnboardingStatusViewModel.builder()
+                    .currentStep("PROFILE_SETUP")
+                    .progressPercentage(20)
+                    .completedSteps(1)
+                    .totalSteps(5)
+                    .nextStepTitle("Complete Profile")
+                    .nextStepDescription("Add additional company details and GSTIN information")
+                    .build())
+                .welcomeMessage("Welcome to ASN Vendor Onboarding Portal! Your account has been created successfully.")
+                .resourceLinks(List.of(
+                    VendorRegistrationResponseViewModel.ResourceLinkViewModel.builder()
+                        .title("Getting Started Guide")
+                        .description("Learn how to onboard with OEMs")
+                        .url("/docs/getting-started")
+                        .type("DOCUMENTATION")
+                        .build(),
+                    VendorRegistrationResponseViewModel.ResourceLinkViewModel.builder()
+                        .title("ASN 2.1 Overview")
+                        .description("Understanding ASN 2.1 requirements")
+                        .url("/docs/asn-overview")
+                        .type("DOCUMENTATION")
+                        .build()
+                ))
+                .build();
+
+        } catch (Exception e) {
+            log.error("Error registering vendor: {}", request.getCompanyName(), e);
+            throw new RuntimeException("Failed to register vendor: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public VendorCheckResponseViewModel checkVendorRegistration(IAuthContextViewModel auth) {
+        log.info("Checking vendor registration status for companyCode: {}", auth.getCompanyCode());
+
+        try {
+            // Check if vendor exists by company code
+            Optional<Vendor> vendorOptional = vendorRepository.findByCompanyCode(auth.getCompanyCode());
+
+            if (vendorOptional.isEmpty()) {
+                // Vendor not registered
+                return VendorCheckResponseViewModel.builder()
+                    .isRegistered(false)
+                    .message("Vendor is not registered for this company")
+                    .build();
+            }
+
+            // Vendor is registered - return details
+            Vendor vendor = vendorOptional.get();
+
+            // Parse primary contact JSON
+            VendorCheckResponseViewModel.ContactInfoViewModel contactInfo = null;
+            if (vendor.getPrimaryContact() != null && !vendor.getPrimaryContact().trim().isEmpty()) {
+                try {
+                    // Simple JSON parsing - in production, use ObjectMapper
+                    String contactJson = vendor.getPrimaryContact();
+                    contactInfo = VendorCheckResponseViewModel.ContactInfoViewModel.builder()
+                        .name(extractJsonValue(contactJson, "name"))
+                        .email(extractJsonValue(contactJson, "email"))
+                        .mobile(extractJsonValue(contactJson, "mobile"))
+                        .designation(extractJsonValue(contactJson, "designation"))
+                        .build();
+                } catch (Exception e) {
+                    log.warn("Error parsing primary contact JSON for vendor: {}", vendor.getVendorId(), e);
+                }
+            }
+
+            // Generate vendor code
+            String vendorCode = "V" + vendor.getVendorId().toString().substring(0, 8).toUpperCase();
+
+            return VendorCheckResponseViewModel.builder()
+                .isRegistered(true)
+                .vendorId(vendor.getVendorId().toString())
+                .vendorCode(vendorCode)
+                .companyName(vendor.getCompanyName())
+                .panNumber(vendor.getPanNumber())
+                .status(vendor.getStatus().name())
+                .registeredAt(vendor.getCreatedAt())
+                .primaryContact(contactInfo)
+                .message("Vendor is registered")
+                .build();
+
+        } catch (Exception e) {
+            log.error("Error checking vendor registration for companyCode: {}", auth.getCompanyCode(), e);
+            throw new RuntimeException("Failed to check vendor registration: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Helper method to extract value from JSON string
+     * This is a simple implementation - in production, use ObjectMapper
+     */
+    private String extractJsonValue(String json, String key) {
+        try {
+            String searchKey = "\"" + key + "\"";
+            int keyIndex = json.indexOf(searchKey);
+            if (keyIndex == -1) return null;
+
+            int colonIndex = json.indexOf(":", keyIndex);
+            if (colonIndex == -1) return null;
+
+            int valueStart = json.indexOf("\"", colonIndex) + 1;
+            int valueEnd = json.indexOf("\"", valueStart);
+
+            if (valueStart > 0 && valueEnd > valueStart) {
+                return json.substring(valueStart, valueEnd);
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     @Override
     public OnboardingProgressViewModel getOnboardingProgress(IAuthContextViewModel auth, String oemId) {
@@ -186,7 +383,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
 
     // Helper methods
     private Vendor getVendorByAuth(IAuthContextViewModel auth) {
-        return vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+        return vendorRepository.findByCompanyCode(auth.getCompanyCode())
             .orElseThrow(() -> new RuntimeException("Vendor not found for user: " + auth.getUserId()));
     }
 
@@ -442,24 +639,52 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     @Override
     public ApiCredentialsResponseViewModel createApiCredentials(IAuthContextViewModel auth,
                                                               ApiCredentialsRequestViewModel request) {
-        log.info("Creating API credentials for vendor: {} and OEM: {}", auth.getUserId(), request.getOemCode());
+        // Check if this is an update or create request
+        if (request.getCredentialId() != null && !request.getCredentialId().trim().isEmpty()) {
+            log.info("Updating API credentials for vendor: {} and OEM: {}, credentialId: {}",
+                auth.getUserId(), request.getOemId(), request.getCredentialId());
+            return updateApiCredentials(auth, request);
+        } else {
+            log.info("Creating API credentials for vendor: {} and OEM: {}", auth.getUserId(), request.getOemId());
+            return createNewApiCredentials(auth, request);
+        }
+    }
 
+    /**
+     * Create new API credentials
+     */
+    private ApiCredentialsResponseViewModel createNewApiCredentials(IAuthContextViewModel auth,
+                                                                   ApiCredentialsRequestViewModel request) {
         try {
             // Get vendor and OEM
             Vendor vendor = getVendorByAuth(auth);
-            OemMaster oem = getOemByCode(request.getOemCode());
+            OemMaster oem = getOemById(request.getOemId());
 
             // Validate e-Sakha credentials (mock validation)
             if (!validateESakhaCredentials(request.getESakhaUserId(), request.getESakhaPassword())) {
                 throw new RuntimeException("Invalid e-Sakha credentials");
             }
 
+            // Check if credentials already exist for this vendor, OEM, and environment
+            Environment environment = Environment.valueOf(request.getEnvironment().toUpperCase());
+            Optional<ApiCredential> existingCredential = apiCredentialRepository
+                .findByVendorAndOemAndEnvironment(vendor, oem, environment);
+
+            if (existingCredential.isPresent()) {
+                throw new RuntimeException("API credentials already exist for this OEM and environment. " +
+                    "Use credentialId in request to update existing credentials.");
+            }
+
+            // Generate secret
+            String clientSecret = "SEC_" + UUID.randomUUID().toString().replace("-", "").substring(0, 32).toUpperCase();
+
             // Create API credentials
             ApiCredential credential = ApiCredential.builder()
                 .vendor(vendor)
                 .oem(oem)
                 .apiKeyHash("ASN_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase())
-                .environment(Environment.valueOf(request.getEnvironment().toUpperCase()))
+                .secretEncrypted(clientSecret) // Store the secret (in production, this should be encrypted)
+                .environment(environment)
                 .isActive(true)
                 .lastRotatedAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusYears(1))
@@ -490,12 +715,113 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                 "API credentials created successfully", auth.getUserId());
 
             // Build response
-            return buildApiCredentialsResponse(credential, request.getOemCode());
+            return buildApiCredentialsResponse(credential, oem.getOemCode());
 
         } catch (Exception e) {
             log.error("Error creating API credentials for vendor: {} and OEM: {}",
-                auth.getUserId(), request.getOemCode(), e);
+                auth.getUserId(), request.getOemId(), e);
             throw new RuntimeException("Failed to create API credentials: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update existing API credentials
+     */
+    private ApiCredentialsResponseViewModel updateApiCredentials(IAuthContextViewModel auth,
+                                                                ApiCredentialsRequestViewModel request) {
+        try {
+            // Get vendor and OEM
+            Vendor vendor = getVendorByAuth(auth);
+            OemMaster oem = getOemById(request.getOemId());
+
+            // Parse credential ID
+            UUID credentialId;
+            try {
+                credentialId = UUID.fromString(request.getCredentialId());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid credential ID format");
+            }
+
+            // Find existing credential
+            ApiCredential credential = apiCredentialRepository.findById(credentialId)
+                .orElseThrow(() -> new RuntimeException("API credential not found with ID: " + request.getCredentialId()));
+
+            // Verify ownership - ensure the credential belongs to the authenticated vendor
+            if (!credential.getVendor().getVendorId().equals(vendor.getVendorId())) {
+                throw new RuntimeException("Unauthorized: This credential does not belong to your account");
+            }
+
+            // Verify company code matches
+            if (!credential.getCompanyCode().equals(auth.getCompanyCode())) {
+                throw new RuntimeException("Unauthorized: Company code mismatch");
+            }
+
+            // Validate e-Sakha credentials (mock validation)
+            if (!validateESakhaCredentials(request.getESakhaUserId(), request.getESakhaPassword())) {
+                throw new RuntimeException("Invalid e-Sakha credentials");
+            }
+
+            // Update credential fields
+            credential.setEnvironment(Environment.valueOf(request.getEnvironment().toUpperCase()));
+            credential.setUpdatedAt(LocalDateTime.now());
+            credential.setUpdatedBy(vendor.getVendorId());
+
+            // Update optional fields if provided
+            if (request.getWebhookUrl() != null && !request.getWebhookUrl().trim().isEmpty()) {
+                // Store webhook URL in additional config or create a new field
+                log.info("Webhook URL updated: {}", request.getWebhookUrl());
+            }
+
+            if (request.getIpWhitelist() != null && !request.getIpWhitelist().trim().isEmpty()) {
+                // Store IP whitelist in additional config
+                log.info("IP Whitelist updated: {}", request.getIpWhitelist());
+            }
+
+            if (request.getRateLimitTier() != null && !request.getRateLimitTier().trim().isEmpty()) {
+                // Update rate limits based on tier
+                String rateLimits = switch (request.getRateLimitTier().toUpperCase()) {
+                    case "BASIC" -> """
+                        {
+                            "per_minute": 60,
+                            "per_hour": 1000,
+                            "per_day": 10000
+                        }""";
+                    case "STANDARD" -> """
+                        {
+                            "per_minute": 120,
+                            "per_hour": 5000,
+                            "per_day": 50000
+                        }""";
+                    case "PREMIUM" -> """
+                        {
+                            "per_minute": 300,
+                            "per_hour": 15000,
+                            "per_day": 150000
+                        }""";
+                    default -> credential.getRateLimits();
+                };
+                credential.setRateLimits(rateLimits);
+            }
+
+            credential = apiCredentialRepository.save(credential);
+
+            // Create onboarding event
+            OnboardingProcess onboardingProcess = onboardingProcessRepository
+                .findByVendorAndOemAndCompanyCode(vendor, oem, auth.getCompanyCode())
+                .orElse(null);
+
+            if (onboardingProcess != null) {
+                createOnboardingEvent(onboardingProcess, "API_CREDENTIALS_UPDATED",
+                    "API credentials updated successfully", auth.getUserId());
+            }
+
+            // Build response
+            return buildApiCredentialsResponse(credential, oem.getOemCode());
+
+        } catch (Exception e) {
+            log.error("Error updating API credentials for vendor: {} and OEM: {}, credentialId: {}",
+                auth.getUserId(), request.getOemId(), request.getCredentialId(), e);
+            throw new RuntimeException("Failed to update API credentials: " + e.getMessage());
         }
     }
 
@@ -509,12 +835,16 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             OemMaster oem = getOemById(oemId);
 
             // Get API credentials
-            ApiCredential credential = apiCredentialRepository
-                .findByVendorAndOemAndCompanyCode(vendor, oem, auth.getCompanyCode())
-                .orElseThrow(() -> new RuntimeException("API credentials not found"));
+            Optional<ApiCredential> credentialOpt = apiCredentialRepository
+                .findByVendorAndOemAndCompanyCode(vendor, oem, auth.getCompanyCode());
 
-            return buildApiCredentialsResponse(credential, oem.getOemCode());
-
+            // Return null if credentials not found (controller will handle this)
+            if (credentialOpt.isEmpty()) {
+                log.info("API credentials not found for vendor: {} and OEM ID: {}", auth.getUserId(), oemId);
+                return null;
+            } else {
+                return buildApiCredentialsResponse(credentialOpt.get(), oem.getOemCode());
+            }
         } catch (Exception e) {
             log.error("Error getting API credentials for vendor: {} and OEM ID: {}",
                 auth.getUserId(), oemId, e);

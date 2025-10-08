@@ -4,7 +4,6 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { PRODUCT } from 'src/app/services/_static/product-constants';
-import { LoginApiService } from 'src/app/services/login-service/login-api.service';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
@@ -20,7 +19,7 @@ export class SignInFormComponent implements OnInit {
   signInForm: FormGroup;
   isPasswordVisible: boolean = false;
 
-  constructor(private fb: FormBuilder, private router: Router, private loginApi: LoginApiService, private authService: AuthService, private notificationService: NotificationService) {
+  constructor(private fb: FormBuilder, private router: Router, private authService: AuthService, private notificationService: NotificationService) {
     // Initialize the form with validations
     this.signInForm = this.fb.group({
       email: new FormControl('', [Validators.required, Validators.email]),  // Type-safe form control
@@ -52,10 +51,10 @@ export class SignInFormComponent implements OnInit {
         productId: PRODUCT.ID 
       };
 
-      this.loginApi.signIn(payload).subscribe({
+      this.authService.signIn(payload).subscribe({
         next: (res) => {
           sessionStorage.setItem("email", this.signInForm.controls['email'].value);
-          this.loginApi.setRequire2FA(true)
+          this.authService.setRequire2FA(true)
           this.router.navigate(['/2fa']);
           this.notificationService.success('Sign-In successfully!');
           this.isLoading = false
@@ -73,7 +72,7 @@ export class SignInFormComponent implements OnInit {
   }
 
   verifyEmail(verifyCode: string): void {
-    this.loginApi.varifyMail(verifyCode).subscribe({
+    this.authService.varifyMail(verifyCode).subscribe({
       next: (res: any) => {
         this.notificationService.success('Email verified successfully!');
         // Optional: Redirect to login page after success

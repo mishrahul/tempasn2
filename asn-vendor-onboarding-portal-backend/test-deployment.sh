@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_ID="noble-stratum-393405"
-REGION="us-central1"
+REGION="asia-south1"
 SERVICE_NAME="asn-vendor-portal-backend"
 
 echo -e "${BLUE}🧪 Testing ASN Vendor Portal Backend Deployment...${NC}"

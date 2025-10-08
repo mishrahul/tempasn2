@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { OnboardingService } from '../../../services/onboarding.service';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
-import { DashboardStats, StepProgress } from 'src/app/models/onboarding.model';
-
+import { DashboardStats, ProgressData, StepProgress } from 'src/app/models/onboarding.model';
+import { SelectedOEM } from 'src/app/models/oem.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,71 +12,84 @@ import { DashboardStats, StepProgress } from 'src/app/models/onboarding.model';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  stats: DashboardStats = {
-    progress: 30,
-    completedSteps: '2/6',
-    daysRemaining: 41,
-    currentPlan: 'Basic'
-  };
+  
+  stats: DashboardStats = {};
 
-  onboardingSteps: StepProgress[] = [];
-  onboardingStepsProgress: number = 0
+  onboardingSteps: ProgressData = {};
+  onboardingStepsProgress: number = 0;
 
-  implementationSteps: StepProgress[] = [];
-  implementationStepsProgress: number = 0
+  implementationSteps: ProgressData = {};
+  implementationStepsProgress: number = 0;
+
+  loading = false;
+  selectedOEM: SelectedOEM | null = null;
 
   constructor(
     private router: Router,
     private onboardingService: OnboardingService,
-    private userService: UserService,
-    private notificationService: NotificationService
-  ) {}
+    private notificationService: NotificationService,
+    private userService: UserService
+  ) {
+    this.selectedOEM = JSON.parse(sessionStorage.getItem('selectedOEM') || '{}');
+  }
 
   ngOnInit(): void {
+    this.loadDashboardStats();
     this.loadDashboardOnboardData();
-    this.loadDashboardImplementationData();
+    // this.loadDashboardImplementationData();
+  }
+
+  private loadDashboardStats(): void {
+    const oemId = this.selectedOEM?.id || null;
+    this.onboardingService.getDashboardStats(oemId).subscribe({
+      next: (response) => {
+        console.log('response1',response)
+        if (response.ok && response.body) {
+          this.stats = response.body;
+          this.userService.setCurrentPlan(this.stats.currentPlan || '');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading dashboard stats:', error);
+        this.notificationService.error(error.error?.message || 'Failed to load dashboard stats');
+      }
+    });
   }
 
   private loadDashboardOnboardData(): void {
-    // Load user stats and onboarding progress
-    this.onboardingService.getOnboardingProgress().subscribe(progress => {
-      console.log(progress)
-      this.onboardingStepsProgress = progress.percentage;
-      // this.stats.completedSteps = `${progress.completedSteps}/${progress.totalSteps}`;
-      this.onboardingSteps = progress.steps;
-    });
-
-    this.userService.getCurrentUser().subscribe(user => {
-      if (user) {
-        this.stats.currentPlan = user.currentPlan;
+    const oemId = this.selectedOEM?.id || null;
+    this.onboardingService.getOnboardingProgress(oemId).subscribe({
+      next: (response) => {
+        console.log('response2 getOnboardingProgress',response)
+        if (response.ok && response.body) {
+          this.onboardingStepsProgress = response.body.percentage || 0;
+          this.onboardingSteps = response.body;
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading onboarding progress:', error);
+        // this.error = 'Failed to load onboarding data';
+        this.notificationService.error(error.error?.message || 'Failed to load onboarding data');
+        this.loading = false;
       }
     });
-
-    // Calculate days remaining
-    const deadline = new Date('2025-09-30');
-    const today = new Date();
-    const timeDiff = deadline.getTime() - today.getTime();
-    this.stats.daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
   }
 
   private loadDashboardImplementationData(): void {
-    this.onboardingService.getImplementationProgress().subscribe(progress => {
-      this.implementationStepsProgress = progress.percentage;
-      // this.stats.completedSteps = `${progress.completedSteps}/${progress.totalSteps}`;
-      this.implementationSteps = progress.steps;
-    });
-
-    this.userService.getCurrentUser().subscribe(user => {
-      if (user) {
-        this.stats.currentPlan = user.currentPlan;
+    const oemId = this.selectedOEM?.id || null;
+    this.onboardingService.getImplementationProgress(oemId).subscribe({
+      next: (response) => {
+        console.log('response3 getImplementationProgress',response)
+        if (response.ok && response.body) {
+          this.implementationStepsProgress = response.body.percentage || 0;
+          this.implementationSteps = response.body;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading implementation progress:', error);
       }
     });
-
-    // Calculate days remaining
-    const deadline = new Date('2025-09-30');
-    const today = new Date();
-    const timeDiff = deadline.getTime() - today.getTime();
-    this.stats.daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
   }
 
   navigateToOnboarding(): void {

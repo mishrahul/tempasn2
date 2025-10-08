@@ -3,7 +3,7 @@ import { PlanService } from '../../../services/plan.service';
 import { UserService } from '../../../services/user.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Plan } from '../../../models/plan.model';
-import { User } from '../../../models/user.model';
+import { CompanyInfo, SubscriptionPlan } from 'src/app/models/settings.model';
 
 @Component({
   selector: 'app-plans',
@@ -12,7 +12,7 @@ import { User } from '../../../models/user.model';
 })
 export class PlansComponent implements OnInit {
   plans: Plan[] = [];
-  currentUser: User | null = null;
+  comapanyInfo: CompanyInfo | null = null;
   loadingPlanId: string | null = null;
 
   constructor(
@@ -22,24 +22,68 @@ export class PlansComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadPlans();
-    this.loadCurrentUser();
+    this.comapanyInfo = JSON.parse(sessionStorage.getItem('companyInfo') || '{}');
+    // this.loadPlans();
+    // this.loadCurrentUser();
+    this.getPlans()
   }
 
-  private loadPlans(): void {
-    this.planService.getPlans().subscribe(plans => {
-      this.plans = plans;
+  // private loadPlans(): void {
+  //   this.planService.getPlans().subscribe(plans => {
+  //     this.plans = plans;
+  //   });
+  // }
+
+  // private loadCurrentUser(): void {
+  //   // this.userService.companyInfo$.subscribe(response => {
+  //   //   this.comapanyInfo = response;
+  //   // });
+  // }
+
+
+  private convertSubscriptionPlanToPlan(subscriptionPlan: SubscriptionPlan): Plan {
+    return {
+      id: subscriptionPlan.planId,
+      name: subscriptionPlan.planName as 'Basic' | 'Professional' | 'Enterprise',
+      price: subscriptionPlan.pricing.yearly,
+      setupFee: subscriptionPlan.pricing.setupFee,
+      period: 'per year',
+      features: subscriptionPlan.features,
+      recommended: subscriptionPlan.featured
+    };
+  }
+
+  getPlans(){
+    this.planService.getSubscriptionPlans().subscribe({
+      next: (response) => {
+        // response.data will be of type SubscriptionPlansResponse
+        const plansData = response.data;
+
+        if (plansData) {
+          console.log('Total plans:', plansData.totalPlans);
+          console.log('Active plans:', plansData.activePlans);
+
+          // Convert SubscriptionPlan[] to Plan[]
+          this.plans = plansData.plans.map(plan => this.convertSubscriptionPlanToPlan(plan));
+          // plansData.plans.forEach(plan => {
+          //   console.log(`Plan: ${plan.planName} (${plan.planCode})`);
+          //   console.log(`Yearly price: ₹${plan.pricing.yearly}`);
+          //   console.log(`Featured: ${plan.featured}`);
+          // });
+        } else {
+          console.warn('No plans data received from server');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading subscription plans:', error);
+      }
     });
   }
 
-  private loadCurrentUser(): void {
-    this.userService.getCurrentUser().subscribe(user => {
-      this.currentUser = user;
-    });
-  }
+
 
   isCurrentPlan(plan: Plan): boolean {
-    return this.currentUser?.currentPlan === plan.name;
+    return this.comapanyInfo?.currentPlan === plan.name;
   }
 
   upgradePlan(planId: string): void {
@@ -49,9 +93,9 @@ export class PlansComponent implements OnInit {
       next: (success) => {
         if (success) {
           const plan = this.plans.find(p => p.id === planId);
-          if (plan && this.currentUser) {
+          if (plan && this.comapanyInfo) {
             // Update user's current plan
-            this.userService.updateUser({ currentPlan: plan.name }).subscribe();
+            // this.userService.updateUser({ currentPlan: plan.name }).subscribe();
             this.notificationService.success(`Successfully upgraded to ${plan.name} plan!`);
           }
         }

@@ -14,9 +14,9 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./alert.component.scss']
 })
 export class AlertComponent {
-  @Input() type: 'warning' | 'info' | 'success' | 'error' = 'info';
-  @Input() message: string = '';
-  @Input() note: string = '';
+  @Input() type: 'warning' | 'info' | 'success' | 'error' | undefined;
+  @Input() message: string | undefined;
+  @Input() note: string | undefined;
   @Input() icon: any = '';
 
   getIcon(): string {

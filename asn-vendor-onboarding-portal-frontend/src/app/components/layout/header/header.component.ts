@@ -1,10 +1,9 @@
-// src/app/components/layout/header/header.component.ts
 import { Component, HostListener, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { UserService } from '../../../services/user.service';
-import { User } from '../../../models/user.model';
 import { OemService } from 'src/app/services/oem.service';
-import { LoginApiService } from 'src/app/services/login-service/login-api.service';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { SelectedOEM } from 'src/app/models/oem.model';
+import { CompanyInfo } from 'src/app/models/settings.model';
 
 @Component({
   selector: 'app-header',
@@ -12,55 +11,40 @@ import { LoginApiService } from 'src/app/services/login-service/login-api.servic
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  user: User | null = null;
-  selectedOEM: string | null = null;
+  selectedOEM: SelectedOEM | null = null;
   showUserMenu = false;
+  companyInfo: CompanyInfo | null = null;
+  currentPlan: string | null = null;
 
   constructor(
     private userService: UserService,
-    private loginApiService: LoginApiService,
-    private router: Router,
-    private oemService: OemService
+    private authService: AuthService,
+    private oemService: OemService,
   ) {}
 
   ngOnInit(): void {
-    this.userService.getCurrentUser().subscribe(user => {
-      this.user = user;
+    
+    this.companyInfo = JSON.parse(sessionStorage.getItem('companyInfo') || '{}');
+
+    this.userService.currentPlan$.subscribe(plan => {
+      this.currentPlan = plan;
     });
 
-    this.oemService.selectedOEM$.subscribe((oem: any) => {
-      this.selectedOEM = oem;
+    this.oemService.selectedOEM$.subscribe((oemJson: string | null) => {
+      if (oemJson) {
+        this.selectedOEM = JSON.parse(oemJson);
+      } else {
+        this.selectedOEM = null;
+      }
     });
 
-    this.selectedOEM = sessionStorage.getItem('selectedOEM');
-
-    this.user = {
-      id: '1',
-      companyName: 'XYZ Solutions Pvt Ltd',
-      panNumber: 'DAKOU6543G',
-      contactPerson: 'Aditya Mehta',
-      email: 'adiinternational@gmail.com',
-      phone: '+91 XXX XXX 1234',
-      currentPlan: 'Basic',
-      vendorCode: 'V01244',
-      gstinDetails: [
-        {
-          gstin: '27AAEPM1234C1ZV',
-          state: 'Maharashtra',
-          vendorCode: 'V00254'
-        },
-        {
-          gstin: '29AABFR7890K1ZW',
-          state: 'Karnataka',
-          vendorCode: 'V00675'
-        }
-      ]
-    }
+    this.selectedOEM = JSON.parse(sessionStorage.getItem('selectedOEM') || '{}');
+    this.currentPlan = sessionStorage.getItem('currentPlan');
   }
 
   getUserInitials(): string {
-    if (!this.user) return 'NA';
-    const words = this.user.companyName.split(' ');
+    if (!this.companyInfo || !this.companyInfo.companyName) return 'NA';
+    const words = this.companyInfo.companyName.split(' ');
     return words.slice(0, 2).map(word => word[0]).join('').toUpperCase();
   }
 
@@ -73,9 +57,8 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.loginApiService.logout();
+    this.authService.logout();
   }
-
   
   @HostListener('document:click', ['$event'])
   onClick(event: Event) {

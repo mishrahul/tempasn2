@@ -38,13 +38,13 @@
                 </div>
             </div>
 
-            <form (submit)="handleCredentialsSubmission()">
+            <form (submit)="createCredentials()">
                 <!-- Pre-filled Company Information -->
                 <div class="form-section" formGroupName="company">
                     <h3 class="section-title">📋 Company Information (Pre-filled)</h3>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label" for="vendorName">TML Vendor Name</label>
+                            <label class="form-label" for="vendorName">Vendor Name</label>
                             <input type="text" class="form-control" id="vendorName" formControlName="vendorName" />
                         </div>
                         <div class="col-md-6">
@@ -78,12 +78,30 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label">e-Sakha User ID *</label>
-                            <input type="text" class="form-control" formControlName="userId" />
+                            <label class="form-label required">e-Sakha User ID</label>
+                            <input type="text" 
+                                class="form-control" 
+                                placeholder="Enter e-Sakha User ID"
+                                autocomplete="off" 
+                                formControlName="userId" 
+                                required
+                            />
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">e-Sakha Password *</label>
-                            <input type="password" class="form-control" formControlName="password" />
+                        <div class="col-md-6 position-relative">
+                            <label class="form-label required">e-Sakha Password</label>
+                            <input
+                                [type]="isPasswordVisible ? 'text' : 'password'"
+                                class="form-control pe-5"
+                                formControlName="password"
+                                placeholder="Enter e-Sakha Password"
+                                autocomplete="new-password"
+                                required
+                            />
+                            <i
+                                [class]="isPasswordVisible ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                                (click)="togglePassword()"
+                                style="position: absolute; top: 44px; right: 22px; cursor: pointer; color: #6b7280;"
+                            ></i>
                         </div>
                     </div>
                 </div>
@@ -94,15 +112,45 @@
                     <div class="mb-3">
                         <label class="form-label">Environment</label>
                         <select class="form-select" formControlName="environment">
-                            <option value="sandbox">Sandbox (Testing)</option>
-                            <option value="production">Production (Live)</option>
+                            <option *ngFor="let env of environments" [value]="env.value">
+                                {{ env.label }}
+                            </option>
                         </select>
+                        <small class="text-muted" *ngIf="form.get('config.environment')?.value">
+                            {{ getEnvironmentDescription(form.get('config.environment')?.value) }}
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Webhook URL (Optional)</label>
-                        <input type="url" class="form-control" formControlName="webhookUrl" placeholder="https://your-system.com/webhook/asn" />
+                        <input type="url" class="form-control"
+                               [class.is-invalid]="form.get('config.webhookUrl')?.invalid && form.get('config.webhookUrl')?.touched"
+                               formControlName="webhookUrl"
+                               placeholder="https://your-system.com/webhook/asn" />
+                        <div class="invalid-feedback" *ngIf="form.get('config.webhookUrl')?.invalid && form.get('config.webhookUrl')?.touched">
+                            Please enter a valid HTTP or HTTPS URL
+                        </div>
                         <small class="text-muted">URL to receive ASN status notifications</small>
                     </div>
+                    <!-- <div class="mb-3">
+                        <label class="form-label">IP Whitelist (Optional)</label>
+                        <input type="text" class="form-control" formControlName="ipWhitelist" placeholder="192.168.1.1,10.0.0.1" />
+                        <small class="text-muted">Comma-separated list of IP addresses allowed to access the API</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rate Limit Tier</label>
+                        <select class="form-select" formControlName="rateLimitTier">
+                            <option value="basic">Basic (100 requests/hour)</option>
+                            <option value="standard">Standard (500 requests/hour)</option>
+                            <option value="premium">Premium (2000 requests/hour)</option>
+                            <option value="enterprise">Enterprise (Unlimited)</option>
+                        </select>
+                        <small class="text-muted">Choose your API rate limit tier based on your usage requirements</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Additional Configuration (Optional)</label>
+                        <textarea class="form-control" formControlName="additionalConfig" rows="3" placeholder="Any additional configuration parameters in JSON format"></textarea>
+                        <small class="text-muted">Optional JSON configuration for advanced settings</small>
+                    </div> -->
                 </div>
 
                 <!-- Submit Buttons -->
@@ -110,32 +158,33 @@
                     <button type="button" class="btn btn-secondary w-100" (click)="goBackToDeployment()">
                         ← Back to Deployment Options
                     </button>
-                    <button type="submit" class="btn btn-primary w-100">
-                        🚀 Create API Credentials
+                    <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading">
+                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        {{ isLoading ? 'Creating Credentials...' : '🚀 Create API Credentials' }}
                     </button>
                 </div>
             </form>
 
             <!-- RESPONSE CONTAINER -->
             <div *ngIf="response" class="response-container" [ngClass]="{ 'response-success': success, 'response-error': !success }">
-                <div *ngIf="success">
+                <div *ngIf="success && isCredentialsData(response)">
                     <h3>✅ API Credentials Created Successfully!</h3>
                     <div class="mt-4">
                         <h4>Your ASN 2.1 API Credentials:</h4>
-                        <p class="mt-4"><strong>Developer ID:</strong> <code> {{ response.developerId }}</code></p>
-                        <p><strong>API Key:</strong> <code> {{ response.apiKey }}</code></p>
-                        <p><strong>Client Secret:</strong> <code> {{ response.clientSecret }}</code></p>
-                        <p><strong>Environment:</strong> {{ response.environment }}</p>
-                        <p><strong>Endpoint URL:</strong> <code> {{ response.endpointUrl }}</code></p>
+                        <p class="mt-4"><strong>Developer ID: </strong> <code>{{ response.developerId }}</code></p>
+                        <p><strong>API Key: </strong> <code>{{ response.apiKey }}</code></p>
+                        <p><strong>Client Secret: </strong> <code>{{ response.clientSecret }}</code></p>
+                        <p><strong>Environment: </strong> {{ response.environment }}</p>
+                        <p><strong>Endpoint URL: </strong> <code>{{ response.endpointUrl }}</code></p>
                     </div>
                     <div class="alert alert-info mt-4">
-                        <strong>Credentials Delivered:</strong> Sent to {{ currentUser.email }}
+                        <strong>Credentials Delivered:</strong> Sent to {{ companyInfo?.email }}
                     </div>
                     <button class="btn btn-success me-2" (click)="downloadCredentials()">📥 Download Credentials</button>
                     <button class="btn btn-primary" (click)="proceedToImplementation()">➡️ Continue to Implementation</button>
                 </div>
 
-                <div *ngIf="!success">
+                <div *ngIf="!success && isErrorResponse(response)">
                     <h3>❌ Credential Creation Failed</h3>
                     <p class="mt-4"><strong>Error:</strong> {{ response.error }}</p>
                     <p><strong>Message:</strong> {{ response.message }}</p>
@@ -143,7 +192,7 @@
                     <div class="alert alert-danger mt-4">
                         <strong>Need Help?</strong> Contact TaxGenie support at support&#64;taxgenie.in
                     </div>
-                    <button class="btn btn-warning" (click)="retry()">🔄 Retry Creation</button>
+                    <button class="btn btn-warning" (click)="retry()">🔄 Retry</button>
                 </div>
             </div>
         </div>

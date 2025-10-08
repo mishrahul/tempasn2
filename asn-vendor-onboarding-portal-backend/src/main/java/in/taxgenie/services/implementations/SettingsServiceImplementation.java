@@ -56,7 +56,7 @@ public class SettingsServiceImplementation implements ISettingsService {
     @Transactional(readOnly = true)
     public CompanyInfoResponseViewModel getCompanyInfo(IAuthContextViewModel auth) {
         logger.info("Getting company info for vendor: {}", auth.getUserId());
-        
+
         try {
             Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
@@ -64,6 +64,25 @@ public class SettingsServiceImplementation implements ISettingsService {
             // Parse primary contact JSON
             String primaryContactJson = vendor.getPrimaryContact();
             Map<String, Object> primaryContact = parseJsonToMap(primaryContactJson);
+
+            // Get primary GSTIN details
+            CompanyInfoResponseViewModel.PrimaryGstinViewModel primaryGstinViewModel = null;
+            Optional<VendorGstin> primaryGstinOpt = vendorGstinRepository.findByVendorAndIsPrimaryTrue(vendor);
+
+            if (primaryGstinOpt.isPresent()) {
+                VendorGstin primaryGstin = primaryGstinOpt.get();
+                primaryGstinViewModel = CompanyInfoResponseViewModel.PrimaryGstinViewModel.builder()
+                        .gstinId(primaryGstin.getGstinId().toString())
+                        .gstin(primaryGstin.getGstin())
+                        .state(getStateName(primaryGstin.getStateCode()))
+                        .stateCode(primaryGstin.getStateCode())
+                        .vendorCode(generateVendorCodeForGstin(primaryGstin))
+                        .isVerified(primaryGstin.getIsVerified())
+                        .verifiedAt(primaryGstin.getVerifiedAt() != null ?
+                                primaryGstin.getVerifiedAt().format(DATE_FORMATTER) : null)
+                        .status(primaryGstin.getIsVerified() ? "VERIFIED" : "PENDING")
+                        .build();
+            }
 
             return CompanyInfoResponseViewModel.builder()
                     .companyName(vendor.getCompanyName())
@@ -74,8 +93,9 @@ public class SettingsServiceImplementation implements ISettingsService {
                     .vendorCode(generateVendorCode(vendor))
                     .status(vendor.getStatus().toString())
                     .lastUpdatedAt(vendor.getUpdatedAt() != null ? vendor.getUpdatedAt().format(DATE_FORMATTER) : null)
+                    .primaryGstin(primaryGstinViewModel)
                     .build();
-                    
+
         } catch (Exception e) {
             logger.error("Error getting company info for vendor: {}", auth.getUserId(), e);
             throw new RuntimeException("Failed to get company information: " + e.getMessage());
@@ -87,7 +107,7 @@ public class SettingsServiceImplementation implements ISettingsService {
         logger.info("Updating company info for vendor: {}", auth.getUserId());
         
         try {
-            Vendor vendor = vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
             // Update vendor fields
@@ -155,7 +175,7 @@ public class SettingsServiceImplementation implements ISettingsService {
         logger.info("Creating GSTIN for vendor: {}", auth.getUserId());
         
         try {
-            Vendor vendor = vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
             // Check if GSTIN already exists
@@ -331,7 +351,7 @@ public class SettingsServiceImplementation implements ISettingsService {
         logger.info("Getting subscription billing for vendor: {}", auth.getUserId());
 
         try {
-            Vendor vendor = vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
             // Get current active subscription
@@ -383,7 +403,7 @@ public class SettingsServiceImplementation implements ISettingsService {
         logger.info("Getting OEM access management for vendor: {}", auth.getUserId());
 
         try {
-            Vendor vendor = vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
             // Get vendor OEM access
@@ -425,7 +445,7 @@ public class SettingsServiceImplementation implements ISettingsService {
             OemMaster oem = oemMasterRepository.findByOemIdAndCompanyCode(UUID.fromString(request.getOemId()), auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("OEM not found"));
 
-            Vendor vendor = vendorRepository.findByCompanyCodeAndUserId(auth.getCompanyCode(), auth.getUserId())
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
             VendorOemAccess vendorOemAccess = vendorOemAccessRepository.findByVendorAndOemAndCompanyCode(vendor, oem, auth.getCompanyCode())

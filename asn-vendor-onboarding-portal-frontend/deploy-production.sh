@@ -30,7 +30,7 @@ ls -la dist/taxgenie-vendor-portal/
 
 # Step 5: Deploy to Firebase
 echo "🚀 Deploying to Firebase..."
-firebase deploy
+firebase deploy --project supplier-connect-app
 
 # Step 6: Post-deployment verification
 echo "✅ Deployment complete!"

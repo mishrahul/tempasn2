@@ -1,0 +1,74 @@
+.add-gstin-content {
+  padding: 1.5rem;
+  min-width: 400px;
+}
+
+.add-gstin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.add-gstin-header-content {
+  flex: 1;
+}
+
+.add-gstin-title {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.add-gstin-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.add-gstin-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  
+  &:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  .material-icons {
+    font-size: 20px;
+  }
+}
+
+.add-gstin-body {
+  margin-bottom: 1.5rem;
+}
+
+.add-gstin-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.add-gstin-checkbox {
+  margin-bottom: 1rem;
+  
+  mat-checkbox {
+    font-size: 0.875rem;
+  }
+}
+
+.add-gstin-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.add-gstin-btn {
+  flex: 1;
+}
+

@@ -2,7 +2,7 @@
     <div class="progress-content">
         <div class="progress-header">
             <div>
-                <h2 class="progress-title">ASN 2.1 Implementation Progress</h2>
+                <h2 class="progress-title">ASN 2.1 {{cardType}} Progress</h2>
                 <p class="progress-subtitle">Track your onboarding journey step by step</p>
             </div>
             <div class="progress-circle" [style.--progress]="progress">
@@ -16,8 +16,8 @@
                     {{getStepIconContent(step)}}
                 </div>
                 <div class="step-content">
-                    <div class="step-title">{{step.title}}</div>
-                    <div class="step-description">{{step.description}}</div>
+                    <div class="step-title">{{step?.title}}</div>
+                    <div class="step-description">{{step?.description}}</div>
                 </div>
             </li>
         </ul>

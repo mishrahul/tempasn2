@@ -1,6 +1,7 @@
 
 export interface ServerResponseWithBody<T> {
-  body: T;
+  body?: T;
+  data?: T;
   message: string;
   ok: boolean;
   responseCode: number;
@@ -29,8 +30,8 @@ export interface JwtViewModel {
 }
 
 export interface IVerificationOTPRequest {
-    username  : string;
-    otp       : string;
-    productId : number;
-    jwt       : string;
+  username  : string;
+  otp       : string;
+  productId : number;
+  jwt       : string;
 }

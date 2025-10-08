@@ -8,13 +8,13 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { LoginApiService } from 'src/app/services/login-service/login-api.service';
 import { NotificationService } from 'src/app/services/notification.service';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   
-  private loginApiService =  inject(LoginApiService)
+  private authService =  inject(AuthService)
   private notificationService =  inject(NotificationService)
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -35,7 +35,7 @@ export class AuthInterceptor implements HttpInterceptor {
             }
 
             if (err.status == 401) {
-              this.loginApiService.logout();
+              this.authService.logout();
             }
           }
         }

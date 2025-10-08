@@ -1,16 +1,20 @@
 export interface OEM {
-  id: string;              // Unique identifier for each OEM
-  logoBackground: string;  // Background gradient for the logo
-  shortName: string;       // Short name for the OEM (e.g., TML, M&M, TAFE)
-  fullName: string;        // Full name for the OEM (e.g., Tata Motors Limited)
-  features: string[];      // List of features
-  isComingSoon?: boolean;  // Optional flag for "coming soon" OEMs
-  noAccess?: boolean;      // Optional flag for "no access" OEMs
+  id: string;
+  logoBackground: string;
+  oemCode: string;
+  fullName: string;
+  features: string[];
+  isComingSoon?: boolean;
+  noAccess?: boolean;
 }
-
-export interface OEMConfig {
-  shortName: string;
-  branding: {
-    asnVersion: string;
-  };
+export interface OemResponseBody {
+  oems: OEM[];
+  totalCount: number;
+  message: string;
+}
+export interface SelectedOEM {
+  id: string;
+  fullName: string;
+  oemCode: string;
+  logoBackground: string;
 }

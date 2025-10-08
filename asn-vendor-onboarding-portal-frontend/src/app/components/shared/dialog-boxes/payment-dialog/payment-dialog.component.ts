@@ -19,7 +19,7 @@ import { NotificationService } from 'src/app/services/notification.service';
 })
 export class PaymentDialogComponent {
   selectedMethod: string | null = null;
-  totalAmount: number = 20060;
+  totalAmount: number = 17500;
 
   constructor(
     private dialogRef: MatDialogRef<PaymentDialogComponent>,
@@ -43,7 +43,7 @@ export class PaymentDialogComponent {
     }
 
     if (this.selectedMethod) {
-      this.dialogRef.close({ method: this.selectedMethod, amount: 20060 });
+      this.dialogRef.close({ method: this.selectedMethod, amount: 17500 });
       this.notificationService.success(`✅ Processing payment with ${this.selectedMethod}, amount: ₹${this.totalAmount}`)
       console.log(`✅ Processing payment with ${this.selectedMethod}, amount: ₹${this.totalAmount}`);
       this.closePaymentModal(true)

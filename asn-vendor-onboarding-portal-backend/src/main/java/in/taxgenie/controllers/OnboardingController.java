@@ -48,6 +48,72 @@ public class OnboardingController {
     }
 
     /**
+     * Register a new vendor (Public endpoint - no authentication required)
+     *
+     * @param request the vendor registration request
+     * @return vendor registration response with access tokens
+     */
+    @PostMapping("/register")
+    public ResponseEntity<IServerResponseWithBody<VendorRegistrationResponseViewModel>> registerVendor(
+            @Valid @RequestBody VendorRegistrationRequestViewModel request) {
+        log.info("Registering new vendor: {}", request.getCompanyName());
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+
+            VendorRegistrationResponseViewModel registrationResponse = onboardingService.registerVendor(request, auth);
+            IServerResponseWithBody<VendorRegistrationResponseViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(201, "Vendor registered successfully", true, registrationResponse);
+            return ResponseEntity.status(201).body(response);
+        } catch (Exception e) {
+            log.error("Error registering vendor: {}", request.getCompanyName(), e);
+
+            // Determine appropriate error message
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("already exists")) {
+                IServerResponseWithBody<VendorRegistrationResponseViewModel> response = serverResponseFactory
+                        .getServerResponseWithBody(409, errorMessage, false, null);
+                return ResponseEntity.status(409).body(response);
+            } else if (errorMessage.contains("do not match")) {
+                IServerResponseWithBody<VendorRegistrationResponseViewModel> response = serverResponseFactory
+                        .getServerResponseWithBody(400, errorMessage, false, null);
+                return ResponseEntity.badRequest().body(response);
+            } else {
+                IServerResponseWithBody<VendorRegistrationResponseViewModel> response = serverResponseFactory
+                        .getServerResponseWithBody(500, "Failed to register vendor: " + errorMessage, false, null);
+                return ResponseEntity.internalServerError().body(response);
+            }
+        }
+    }
+
+    /**
+     * Check if vendor is registered using companyCode from authentication token
+     * (Protected endpoint - requires authentication)
+     *
+     * @return vendor check response with registration status
+     */
+    @GetMapping("/check-registration")
+    public ResponseEntity<IServerResponseWithBody<VendorCheckResponseViewModel>> checkVendorRegistration() {
+        log.info("Checking vendor registration status");
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            VendorCheckResponseViewModel checkResponse = onboardingService.checkVendorRegistration(auth);
+
+            // Return 200 OK with registration status
+            IServerResponseWithBody<VendorCheckResponseViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(200, checkResponse.getMessage(), true, checkResponse);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error checking vendor registration", e);
+            IServerResponseWithBody<VendorCheckResponseViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(500, "Failed to check vendor registration: " + e.getMessage(), false, null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
      * Get onboarding progress for a specific OEM
      *
      * @param id the OEM ID
@@ -181,7 +247,7 @@ public class OnboardingController {
     @PostMapping("/create-credentials")
     public ResponseEntity<IServerResponseWithBody<ApiCredentialsResponseViewModel>> createApiCredentials(
             @Valid @RequestBody ApiCredentialsRequestViewModel request) {
-        log.info("Creating API credentials for OEM: {}", request.getOemCode());
+        log.info("Creating API credentials for OEM: {}", request.getOemId());
 
         try {
             IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
@@ -190,7 +256,7 @@ public class OnboardingController {
                     .getServerResponseWithBody(200, "API credentials created successfully", true, credentialsResponse);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Error creating API credentials for OEM: {}", request.getOemCode(), e);
+            log.error("Error creating API credentials for OEM: {}", request.getOemId(), e);
             IServerResponseWithBody<ApiCredentialsResponseViewModel> response = serverResponseFactory
                     .getServerResponseWithBody(400, "Failed to create API credentials: " + e.getMessage(), false, null);
             return ResponseEntity.badRequest().body(response);
@@ -210,9 +276,17 @@ public class OnboardingController {
         try {
             IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
             ApiCredentialsResponseViewModel credentials = onboardingService.getApiCredentials(auth, id);
-            IServerResponseWithBody<ApiCredentialsResponseViewModel> response = serverResponseFactory
-                    .getServerResponseWithBody(200, "API credentials retrieved successfully", true, credentials);
-            return ResponseEntity.ok(response);
+
+            // If credentials not found, return 200 with ok: false
+            if (credentials == null) {
+                IServerResponseWithBody<ApiCredentialsResponseViewModel> response = serverResponseFactory
+                        .getServerResponseWithBody(200, "API credentials not found", false, null);
+                return ResponseEntity.ok(response);
+            } else {
+                IServerResponseWithBody<ApiCredentialsResponseViewModel> response = serverResponseFactory
+                        .getServerResponseWithBody(200, "API credentials retrieved successfully", true, credentials);
+                return ResponseEntity.ok(response);
+            }
         } catch (Exception e) {
             log.error("Error getting API credentials for OEM ID: {}", id, e);
             IServerResponseWithBody<ApiCredentialsResponseViewModel> response = serverResponseFactory

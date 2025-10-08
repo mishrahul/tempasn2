@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { UppercaseDirective } from 'src/app/directives/uppercase.directive';
 import { PLAN, PRODUCT, ROLE } from 'src/app/services/_static/product-constants';
-import { LoginApiService } from 'src/app/services/login-service/login-api.service';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class SignUpFormComponent implements OnInit{
   loginUrl!: string
   isLoading = false
 
-  constructor(private fb: FormBuilder, private router: Router, private loginApi: LoginApiService, private notificationService: NotificationService) {
+  constructor(private fb: FormBuilder, private router: Router, private authService: AuthService, private notificationService: NotificationService) {
     this.signUpForm = this.fb.group({
       companyName: ['', [Validators.required]],
       panNumber: ['', [Validators.required, Validators.pattern('^[A-Z]{5}[0-9]{4}[A-Z]{1}$')]],
@@ -61,7 +61,7 @@ export class SignUpFormComponent implements OnInit{
         loginUrl: this.loginUrl
       }
       // Handle the sign-up logic, call API or whatever you need
-      this.loginApi.signUp(payload).subscribe({
+      this.authService.signUp(payload).subscribe({
         next: (res: any) => {
           this.isLoading = false
           this.notificationService.success(res?.response);

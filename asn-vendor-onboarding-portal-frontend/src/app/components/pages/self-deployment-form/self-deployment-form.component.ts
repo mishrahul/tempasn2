@@ -1,8 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NotificationService } from 'src/app/services/notification.service';
+import { OnboardingService } from 'src/app/services/onboarding.service';
+import { CredentialsData, CredentialsResponse, CredentialsErrorResponse, Environment, CreateCredentialsRequest } from 'src/app/models/onboarding.model';
+import { AVAILABLE_ENVIRONMENTS, DEFAULT_ENVIRONMENT } from 'src/app/constants/environment.constants';
+import { CompanyInfo } from 'src/app/models/settings.model';
+import { SettingsService } from 'src/app/services/settings.service';
 
 @Component({
   selector: 'app-self-deployment-form',
@@ -13,73 +18,126 @@ import { NotificationService } from 'src/app/services/notification.service';
 })
 export class SelfDeploymentFormComponent implements OnInit {
   form!: FormGroup;
-  response: any = null;
+  response: CredentialsData | CredentialsErrorResponse | null = null;
   success = false;
+  isPasswordVisible: boolean = false;
+  isLoading = false;
+  environments: Environment[] = AVAILABLE_ENVIRONMENTS;
+  oemId: string | null = null;
+  companyInfo: CompanyInfo | null = null;
 
-  // 🟢 Demo user info (replace with real auth user later)
-  currentUser = {
-    vendorCode: 'V123456',
-    email: 'vendor@example.com'
-  };
-
-  constructor(private fb: FormBuilder, private router: Router, public notificationService: NotificationService) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    public notificationService: NotificationService,
+    private onboardingService: OnboardingService,
+  ) {}
 
   ngOnInit(): void {
+    this.oemId = JSON.parse(sessionStorage.getItem('selectedOEM') || '{}').id || null;
+    this.companyInfo = JSON.parse(sessionStorage.getItem('companyInfo') || '{}');
+
     this.form = this.fb.group({
       company: this.fb.group({
-        vendorName: [{ value: 'Tata Vendor Pvt Ltd', disabled: true }],
-        vendorCode: [{ value: 'V123456', disabled: true }],
-        panNumber: [{ value: 'ABCDE1234F', disabled: true }],
-        gstinNumber: [{ value: '27AAACJ9630N1ZV', disabled: true }]
+        vendorName: [{ value: this.companyInfo?.companyName || '', disabled: true }],
+        vendorCode: [{ value: this.companyInfo?.vendorCode || '', disabled: true }],
+        panNumber: [{ value: this.companyInfo?.panNumber || '', disabled: true }],
+        gstinNumber: [{ value: this.companyInfo?.primaryGstin?.gstin || '', disabled: true }]
       }),
       credentials: this.fb.group({
         userId: ['', Validators.required],
         password: ['', Validators.required]
       }),
       config: this.fb.group({
-        environment: ['sandbox'],
-        webhookUrl: ['']
+        environment: [DEFAULT_ENVIRONMENT],
+        webhookUrl: ['', [this.urlValidator]],
+        // ipWhitelist: [''],
+        // rateLimitTier: ['standard'],
+        // additionalConfig: ['']
       })
     });
+
+    this.loadCredentials()
   }
 
-  handleCredentialsSubmission(): void {
-    console.log('1111')
-    if (this.form.valid) {
-    console.log('2222')
+  // Toggle password visibility
+  togglePassword() {
+    this.isPasswordVisible = !this.isPasswordVisible;
+  }
 
-      // Simulate API response (replace with real API call)
-      const payload = this.form.getRawValue();
+  // URL validator - only validates if value is provided
+  urlValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value || value.trim() === '') {
+      return null; // Allow empty values since webhookUrl is optional
+    }
 
-      // Demo success/failure toggle
-      if (payload.credentials.userId === 'fail') {
-        console.log('3333')
-
-        this.success = false;
-        this.response = {
-          error: 'Invalid Credentials',
-          message: 'The provided e-Sakha credentials are not valid.',
-          details: 'User not found in e-Sakha system'
-        };
-      } else {
-    console.log('4444')
-
-        this.success = true;
-        this.response = {
-          developerId: 'DEV_' + this.currentUser.vendorCode,
-          apiKey: 'ASN_' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-          clientSecret: 'SEC_' + Math.random().toString(36).substring(2, 12),
-          environment: payload.config.environment,
-          endpointUrl: 'https://api-tml.apigee.net/asn/v2.1/'
-        };
-
-        console.log('response',this.response)
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return { invalidUrl: true };
       }
-    } else {
-    console.log('5555')
+      return null;
+    } catch {
+      return { invalidUrl: true };
+    }
+  }
 
+  createCredentials(): void {
+    if (this.form.valid) {
+      this.isLoading = true;
+      const formData = this.form.getRawValue();
+
+      // Prepare the payload according to CreateCredentialsRequest interface
+      const payload: CreateCredentialsRequest = {
+        oemId: this.oemId,
+        environment: formData.config.environment,
+        esakhaUserId: formData.credentials.userId,
+        esakhaPassword: formData.credentials.password
+      };
+
+      // Only add webhookUrl if it's provided and valid
+      if (formData.config.webhookUrl && formData.config.webhookUrl.trim() !== '') {
+        payload.webhookUrl = formData.config.webhookUrl;
+      }
+
+      if(this.response && this.isCredentialsData(this.response)){
+        payload.credentialId = this.response.credentialId;
+      }
+
+      this.onboardingService.createCredentials(payload).subscribe({
+        next: (response: CredentialsResponse) => {
+          console.log('Create credentials response:', response);
+          this.isLoading = false;
+          if (response.ok && response.body) {
+            this.success = true;
+            this.response = response.body;
+            this.notificationService.success('Credentials created successfully!');
+          } else {
+            this.success = false;
+            this.response = {
+              error: 'API Error',
+              message: response.message || 'Failed to create credentials',
+              details: 'Please try again or contact support'
+            };
+            this.notificationService.error('Failed to create credentials');
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.success = false;
+          this.response = {
+            error: error.name || 'Network Error',
+            message: error.error.message || 'Unable to connect to the server',
+            details: error.message || 'Please check your internet connection and try again'
+          };
+          this.notificationService.error('Failed to create credentials');
+          console.error('API Error:', error);
+        }
+      });
+    } else {
       this.success = false;
-      this.notificationService.error('Please fill all required fields')
+      this.notificationService.error('Please fill all required fields');
       this.response = {
         error: '❌ Please fill all required fields',
         message: 'Missing required inputs',
@@ -90,6 +148,7 @@ export class SelfDeploymentFormComponent implements OnInit {
 
   goBackToDeployment(): void {
     this.router.navigate(['onboarding']);
+    sessionStorage.setItem('onboardingStep','deployment')
   }
 
   downloadCredentials(): void {
@@ -114,5 +173,50 @@ export class SelfDeploymentFormComponent implements OnInit {
   retry(): void {
     this.response = null;
     this.success = false;
+    this.createCredentials()
+  }
+
+  loadCredentials(): void {
+    this.isLoading = true;
+    const credentialId = this.oemId;
+    this.onboardingService.getOnboardingCredentials(credentialId).subscribe({
+      next: (response) => {
+          console.log('Create credentials response:', response);
+          this.isLoading = false;
+          if (response.ok && response.body) {
+            this.success = true;
+            this.response = response.body;
+            this.notificationService.success('Credentials created successfully!');
+          } else {
+            this.success = false;
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.success = false;
+          this.response = {
+            error: error.name || 'Network Error',
+            message: error.error.message || 'Unable to connect to the server',
+            details: error.message || 'Please check your internet connection and try again'
+          };
+          this.notificationService.error('Failed to create credentials');
+          console.error('API Error:', error);
+        }
+    });
+  }
+
+  // Helper methods for template type checking
+  isCredentialsData(response: any): response is CredentialsData {
+    return response && 'credentialId' in response;
+  }
+
+  isErrorResponse(response: any): response is CredentialsErrorResponse {
+    return response && 'error' in response;
+  }
+
+  // Get environment description by value
+  getEnvironmentDescription(value: string): string {
+    const environment = this.environments.find(env => env.value === value);
+    return environment?.description || '';
   }
 }

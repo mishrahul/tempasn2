@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyInfoResponseViewModel {
-    
+
     private String companyName;
     private String panNumber;
     private String contactPerson;
@@ -22,4 +22,23 @@ public class CompanyInfoResponseViewModel {
     private String vendorCode;
     private String status;
     private String lastUpdatedAt;
+    private PrimaryGstinViewModel primaryGstin;
+
+    /**
+     * Nested class for Primary GSTIN details
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PrimaryGstinViewModel {
+        private String gstinId;
+        private String gstin;
+        private String state;
+        private String stateCode;
+        private String vendorCode;
+        private boolean isVerified;
+        private String verifiedAt;
+        private String status;
+    }
 }

@@ -18,7 +18,7 @@
             <div class="oem-grid">
                 <!-- Dynamically generated OEM cards -->
                 <div *ngFor="let oem of oems" class="oem-card" [class.coming-soon]="oem.isComingSoon" [class.no-access]="oem.noAccess" (click)="selectOEM(oem)" [attr.data-oem]="oem.id">                
-                    <div class="oem-logo" [style.background]="oem.logoBackground">{{ oem.shortName }}</div>
+                    <div class="oem-logo" [style.background]="oem.logoBackground">{{ oem.oemCode }}</div>
                     <h3 class="oem-name">{{ oem.fullName }}</h3>
                     <p class="oem-full-name">{{ oem.fullName }}</p>
                     <ul class="oem-features">

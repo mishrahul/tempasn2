@@ -1,54 +1,61 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { User } from '../models/user.model';
+import { BehaviorSubject } from 'rxjs';
+import { SettingsService } from './settings.service';
+import { CompanyInfo } from '../models/settings.model';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private currentUserSubject = new BehaviorSubject<User | null>(this.getMockUser());
-  public currentUser$ = this.currentUserSubject.asObservable();
+  // private companyInfoSubject = new BehaviorSubject<CompanyInfo | null>(null);
+  // public companyInfo$ = this.companyInfoSubject.asObservable();
+  
+  private currentPlanSubject = new BehaviorSubject<string | null>(null);
+  public currentPlan$ = this.currentPlanSubject.asObservable();
 
-  getCurrentUser(): Observable<User | null> {
-    return this.currentUser$;
+  constructor(private settingsService: SettingsService) {}
+
+  setCurrentPlan(plan: string): void {
+    this.currentPlanSubject.next(plan);
+    sessionStorage.setItem('currentPlan', plan);
   }
 
-  updateUser(user: Partial<User>): Observable<User> {
-    const currentUser = this.currentUserSubject.value;
-    if (currentUser) {
-      const updatedUser = { ...currentUser, ...user };
-      this.currentUserSubject.next(updatedUser);
-      return of(updatedUser);
-    }
-    throw new Error('No current user');
-  }
+  // getCurrentPlan(): string | null {
+  //   return this.currentPlanSubject.value;
+  // }
 
-  logout(): void {
-    this.currentUserSubject.next(null);
-  }
+  // /**
+  //  * Load company info from API only once, then cache in BehaviorSubject
+  //  */
+  // loadCompanyInfo(forceReload: boolean = false): void {
+  //   if (!forceReload && this.companyInfoSubject.value) {
+  //     // Already loaded, skip API call
+  //     return;
+  //   }
 
-  private getMockUser(): User {
-    return {
-      id: '1',
-      companyName: 'XYZ Solutions Pvt Ltd',
-      panNumber: 'DAKOU6543G',
-      contactPerson: 'Aditya Mehta',
-      email: 'adiinternational@gmail.com',
-      phone: '+91 XXX XXX 1234',
-      currentPlan: 'Basic',
-      vendorCode: 'V01244',
-      gstinDetails: [
-        {
-          gstin: '27AAEPM1234C1ZV',
-          state: 'Maharashtra',
-          vendorCode: 'V00254'
-        },
-        {
-          gstin: '29AABFR7890K1ZW',
-          state: 'Karnataka',
-          vendorCode: 'V00675'
-        }
-      ]
-    };
-  }
+  //   this.settingsService.getCompanyInfo().subscribe({
+  //     next: (response) => {
+  //       this.companyInfoSubject.next(response.data || null);
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading company info:', error);
+  //       this.companyInfoSubject.next(null);
+  //     }
+  //   });
+  // }
+
+  // /**
+  //  * Get the latest company info synchronously (if already loaded)
+  //  */
+  // getCompanyInfoSync(): CompanyInfo | null {
+  //   return this.companyInfoSubject.value;
+  // }
+
+  // /**
+  //  * Clear cached company info (e.g. on logout)
+  //  */
+  // clearCompanyInfo(): void {
+  //   this.companyInfoSubject.next(null);
+  // }
 }

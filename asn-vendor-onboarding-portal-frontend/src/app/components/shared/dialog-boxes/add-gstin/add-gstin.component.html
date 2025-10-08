@@ -1,0 +1,59 @@
+<div class="add-gstin-content">
+  <div class="add-gstin-header">
+    <div class="add-gstin-header-content">
+      <h3 class="add-gstin-title">{{ data?.isEditMode ? 'Update GSTIN' : 'Add New GSTIN' }}</h3>
+      <p class="add-gstin-subtitle">Enter GSTIN details for verification</p>
+    </div>
+    <button type="button" class="add-gstin-close-btn" (click)="onCancel()">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <form [formGroup]="gstinForm" (ngSubmit)="onSubmit()">
+    <div class="add-gstin-body">
+      <mat-form-field appearance="outline" class="add-gstin-field">
+        <mat-label>GSTIN Number</mat-label>
+        <input matInput formControlName="gstin" placeholder="Enter 15-digit GSTIN">
+        <mat-error *ngIf="gstinForm.get('gstin')?.hasError('required')">
+          GSTIN is required
+        </mat-error>
+        <mat-error *ngIf="gstinForm.get('gstin')?.hasError('pattern')">
+          Invalid GSTIN format
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="add-gstin-field">
+        <mat-label>State</mat-label>
+        <input matInput formControlName="state" placeholder="State will be auto-filled">
+        <mat-error *ngIf="gstinForm.get('state')?.hasError('required')">
+          State is required (auto-filled from GSTIN)
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" *ngIf="data?.isEditMode" class="add-gstin-field">
+        <mat-label>Vendor Code</mat-label>
+        <input matInput formControlName="vendorCode" placeholder="Enter vendor code">
+        <mat-error *ngIf="gstinForm.get('vendorCode')?.hasError('required')">
+          Vendor code is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="add-gstin-checkbox">
+        <mat-checkbox formControlName="primary">
+          Set as Primary GSTIN
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <div class="add-gstin-actions">
+      <button type="button" class="btn btn-ghost add-gstin-btn" (click)="onCancel()">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary add-gstin-btn" [disabled]="!isFormValid">
+        {{ data?.isEditMode ? 'Update GSTIN' : 'Add GSTIN' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+

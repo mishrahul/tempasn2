@@ -1,0 +1,44 @@
+# Angular / Node.js specific ignores
+node_modules/
+dist/
+tmp/
+out-tsc/
+
+# Environment files (keep local secrets out of git)
+# src/environments/*.ts
+# !src/environments/environment*.ts  # keep template files (if any)
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage reports
+coverage/
+
+# Build artifacts
+*.tgz
+*.zip
+
+# Angular cache
+.angular/
+
+# Misc
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Optional: ignore Firebase/Deployment configs if not needed
+.firebase/
+.firebaserc

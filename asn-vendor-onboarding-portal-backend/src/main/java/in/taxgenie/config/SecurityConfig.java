@@ -137,7 +137,7 @@ public class SecurityConfig {
             configuration.setAllowedOrigins(Arrays.asList(
                     "http://localhost:3000",
                     "http://localhost:4200",
-                    "https://yourfrontend.com"  // Replace with your actual frontend domain
+                    "https://supplier-connect-app.web.app"  // Replace with your actual frontend domain
             ));
 
             // Also set origin patterns for wildcard support

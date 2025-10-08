@@ -11,6 +11,29 @@
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  
+  .status-badge {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.2rem;
+    white-space: nowrap;
+    
+    &.active {
+      background: #d1fae5;
+      color: #065f46;
+      // border: 1px solid #059669;
+    }
+    
+    &.inactive {
+      background: #fee2e2;
+      color: #991b1b;
+      // border: 1px solid #dc2626;
+    }
+  }
 }
 
 .dashboard-subtitle {
@@ -146,18 +169,35 @@ input:disabled{
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   padding: 2rem;
-}
 
-.oem-access-description {
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
+  h3 {
+    color: var(--taxgenie-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
 }
 
 /* Grid Layout */
 .oem-access-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .oem-access-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .oem-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* OEM Item Card */
@@ -169,12 +209,20 @@ input:disabled{
   border: 2px solid var(--border-light);
   text-align: center;
   transition: background 0.3s ease, color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
 }
 
 .oem-item--active {
   background: linear-gradient(135deg, var(--oem-primary), var(--oem-secondary));
   color: white;
   border: 2px solid transparent;
+
+  p{
+    color: rgba(255, 255, 255, 0.8);
+  }
 }
 
 /* Text Elements */
@@ -195,10 +243,60 @@ input:disabled{
   border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 600;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 /* Switch Button */
 .oem-switch-btn {
   font-size: 0.75rem;
   padding: 0.5rem 1rem;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+
+.btn-icon {
+  padding: 0.5rem;
+  min-width: auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  
+  &:last-child {
+    margin-right: 0;
+  }
+  
+  .material-icons {
+    font-size: 18px;
+  }
+}
+
+.gstin-table {
+  max-height: 26rem;
+  overflow-y: auto;
+  td:last-child {
+    white-space: nowrap;
+  }
+}
+
+.primary-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  
+  &.primary {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  &.secondary {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
 }

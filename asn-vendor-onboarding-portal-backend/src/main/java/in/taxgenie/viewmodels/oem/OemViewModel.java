@@ -24,7 +24,6 @@ public class OemViewModel {
     private List<String> features;
     private String status;
     private boolean hasAccess;
-    private String accessLevel;
     private boolean isComingSoon;
     private boolean noAccess;
     private String noAccessReason;

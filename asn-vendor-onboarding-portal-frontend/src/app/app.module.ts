@@ -1,8 +1,10 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { StepsModule } from 'primeng/steps';
+import { StepperModule } from 'primeng/stepper';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -41,6 +43,7 @@ import { AiUtilityService } from './services/ai-utility.service';
 import { ToastrModule } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { OemInterceptor } from './core/interceptors/oem.interceptor';
 
 @NgModule({
   declarations: [
@@ -67,7 +70,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     FormsModule,
     HttpClientModule,
     ToastrModule.forRoot(),
-    CommonModule
+    StepsModule,
+    StepperModule
   ],
   providers: [
     NotificationService,
@@ -83,8 +87,14 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: OemInterceptor,
+      multi: true
     }
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

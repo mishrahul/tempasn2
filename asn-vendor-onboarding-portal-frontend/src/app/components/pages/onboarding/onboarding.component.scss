@@ -98,6 +98,7 @@
   padding: 1.5rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
+  max-height: 14rem;
 }
 
 .asn-section-card p {
@@ -148,4 +149,39 @@
       margin-bottom: 0.5rem;
     }
   }
+}
+
+.onboarding {
+  ::ng-deep p-steps {
+    ::ng-deep .p-menuitem-link {
+      text-decoration: none;
+    }
+
+    ::ng-deep .p-menuitem-link .p-steps-number {
+      // background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+      color: #6e6e6e;
+      cursor: pointer;
+    }
+
+    ::ng-deep .p-highlight .p-steps-number {
+      background: linear-gradient(135deg, var(--taxgenie-primary), var(--taxgenie-secondary));
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+      color: #ffffff;
+    }
+
+    ::ng-deep nav ul{
+      padding: 0;
+    }
+    
+    ::ng-deep .p-steps .p-steps-item:before {
+      top: 55%;
+    }
+  }
+}
+
+.gstin-deatils{
+  // max-height: 10rem;
+  height: 9rem;
+  overflow-y: auto;
 }

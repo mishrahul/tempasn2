@@ -42,10 +42,9 @@ public class OemPortalService implements IOemPortalService {
         
         try {
             List<OemMaster> allOems = oemMasterRepository.findAll();
-            List<VendorOemAccess> vendorAccess = new ArrayList<>();//vendorOemAccessRepository.findAllByCompanyCode(auth.getCompanyCode());
 
             List<OemViewModel> oemViewModels = allOems.stream()
-                    .map(oem -> mapToOemViewModel(oem, vendorAccess))
+                    .map(oem -> mapToOemViewModel(oem))
                     .collect(Collectors.toList());
 
             return AvailableOemsResponseViewModel.builder()
@@ -68,10 +67,7 @@ public class OemPortalService implements IOemPortalService {
         try {
             OemMaster oem = oemMasterRepository.findById(UUID.fromString(oemId))
                     .orElseThrow(() -> new RuntimeException("OEM not found"));
-
-            List<VendorOemAccess> vendorAccess = new ArrayList<>();//vendorOemAccessRepository.findAllByCompanyCode(auth.getCompanyCode());
-
-            return mapToOemViewModel(oem, vendorAccess);
+            return mapToOemViewModel(oem);
             
         } catch (Exception e) {
             logger.error("Error getting OEM details for OEM ID: {} and vendor ID: {}", oemId, auth.getUserId(), e);
@@ -175,16 +171,16 @@ public class OemPortalService implements IOemPortalService {
         }
     }
 
-    private OemViewModel mapToOemViewModel(OemMaster oem, List<VendorOemAccess> vendorAccess) {
-        Optional<VendorOemAccess> access = vendorAccess.stream()
-                .filter(va -> va.getAccessId().equals(oem.getOemId()))
-                .findFirst();
+    private OemViewModel mapToOemViewModel(OemMaster oem) {
 
-        boolean hasAccess = false;//access.map(VendorOemAccess::getHasAccess).orElse(false);
-        String accessLevel = access.map(va -> va.getAccessLevel().toString()).orElse(null);
+
+        boolean hasAccess = true;
         boolean isComingSoon = oem.getStatus() == Status.COMING_SOON;
         boolean noAccess = !hasAccess && !isComingSoon && oem.getStatus() == Status.ACTIVE;
 
+        if(isComingSoon){
+            hasAccess =false;
+        }
         return OemViewModel.builder()
                 .id(String.valueOf(oem.getOemId()))
                 .oemCode(oem.getOemCode())
@@ -194,7 +190,6 @@ public class OemPortalService implements IOemPortalService {
                 .features(getOemFeatures(String.valueOf(oem.getOemId())))
                 .status(oem.getStatus().toString())
                 .hasAccess(hasAccess)
-                .accessLevel(accessLevel)
                 .isComingSoon(isComingSoon)
                 .noAccess(noAccess)
                 .noAccessReason(noAccess ? "Subscription required" : null)

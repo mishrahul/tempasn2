@@ -1,0 +1,53 @@
+.confirmation-dialog-content {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 0;
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.confirmation-header {
+  text-align: center;
+  padding: 2rem 2rem 1rem 2rem;
+  
+  .confirmation-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    
+    &.icon-danger { color: var(--danger); }
+    &.icon-warning { color: var(--warning); }
+    &.icon-success { color: var(--success); }
+    &.icon-info { color: var(--taxgenie-primary); }
+  }
+  
+  .confirmation-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+}
+
+.confirmation-body {
+  padding: 0 2rem 1.5rem 2rem;
+  text-align: center;
+  
+  .confirmation-message {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.confirmation-actions {
+  padding: 1.5rem 2rem 2rem 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  
+  .btn {
+    min-width: 100px;
+    padding: 0.75rem 1.5rem;
+  }
+}

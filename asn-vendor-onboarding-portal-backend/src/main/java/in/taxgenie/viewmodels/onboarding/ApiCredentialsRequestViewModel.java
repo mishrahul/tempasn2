@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * View model for API credentials creation request
+ * View model for API credentials creation/update request
+ * If credentialId is null, it's a create request
+ * If credentialId is not null, it's an update request
  */
 @Data
 @Builder
@@ -16,8 +18,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ApiCredentialsRequestViewModel {
 
-    @NotBlank(message = "OEM code is required")
-    private String oemCode;
+    /**
+     * Credential ID - if provided, this is an update request; otherwise, it's a create request
+     */
+    private String credentialId;
+
+    @NotBlank(message = "OEM ID is required")
+    private String oemId;
 
     @NotBlank(message = "e-Sakha User ID is required")
     private String eSakhaUserId;

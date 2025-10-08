@@ -112,16 +112,6 @@ public interface VendorRepository extends BaseRepository<Vendor> {
     Optional<Vendor> findByCompanyCodeAndVendorId(@Param("companyCode") Long companyCode, @Param("vendorId") UUID vendorId);
 
     /**
-     * Find vendor by company code and user ID
-     *
-     * @param companyCode the company code
-     * @param userId the user ID
-     * @return Optional containing the vendor if found
-     */
-    @Query("SELECT v FROM Vendor v WHERE v.companyCode = :companyCode AND v.userId = :userId")
-    Optional<Vendor> findByCompanyCodeAndUserId(@Param("companyCode") Long companyCode, @Param("userId") Long userId);
-
-    /**
      * Find recently registered vendors
      * 
      * @param dateTime the date time threshold

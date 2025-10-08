@@ -1,103 +1,93 @@
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
-import { ImplementationProgress, OnboardingProgress } from '../models/onboarding.model';
+import { RestService } from './rest.service';
+import { getUrlPathFragment } from './_static/util';
+import { ServerResponseWithBody } from '../models/app.models';
+import { ConfirmationData, CreateCredentialsRequest, CredentialsResponse, DashboardStats, ImplementationProgress, OnboardingProgress, ProgressData, SelectDeploymentRequest } from '../models/onboarding.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OnboardingService {
-  private mockOnboardingProgress: OnboardingProgress = {
-    percentage: 75,
-    completedSteps: 3,
-    totalSteps: 4,
-    steps: [
-      {
-        id: 1,
-        title: 'Account Setup',
-        description: 'Initial registration and vendor verification completed',
-        status: 'completed'
-      },
-      {
-        id: 2,
-        title: 'ASN 2.1 Confirmation',
-        description: 'Review and confirm implementation requirements',
-        status: 'completed'
-      },
-      
-      {
-        id: 3,
-        title: 'Payment',
-        description: 'Pay based on Deployment Method Selection',
-        status: 'current'
-      },
-      {
-        id: 5,
-        title: 'Deployment Method Selection',
-        description: 'Choose between self-deployment or assisted implementation',
-        status: 'pending'
-      },
-      // {
-      //   id: 5,
-      //   title: 'Implementation and UAT',
-      //   description: 'ERP/Tally Integration & UAT',
-      //   status: 'pending'
-      // },
-      // {
-      //   id: 6,
-      //   title: 'Production Go Live',
-      //   description: 'Final deployment and activation',
-      //   status: 'pending'
-      // }
-    ]
-  };
 
+  constructor(private restService: RestService) {}
 
-  private mockImplementationProgress: ImplementationProgress = {
-    percentage: 33,
-    completedSteps: 2,
-    totalSteps: 6,
-    steps: [
-      {
-        id: 1,
-        title: 'Deployment',
-        description: 'ERP/Tally integration and system configuration',
-        status: 'completed'
-      },
-      {
-        id: 2,
-        title: 'User Acceptance Testing',
-        description: 'Testing and validation of ASN 2.1 implementation',
-        status: 'current'
-      },
-      {
-        id: 3,
-        title: 'Go Live',
-        description: 'Final deployment and production activation',
-        status: 'pending'
-      },
-    ]
-  };
-
-
-  getOnboardingProgress(): Observable<OnboardingProgress> {
-    return of(this.mockOnboardingProgress);
+  // API Methods
+  getOnboardingProgress(oemId: string | null): Observable<ServerResponseWithBody<ProgressData>> {
+    return this.restService.read<ServerResponseWithBody<ProgressData>>(
+      getUrlPathFragment('dashboard', 'onboarding-progress', oemId)
+    );
   }
 
-  getImplementationProgress(): Observable<ImplementationProgress> {
-    return of(this.mockImplementationProgress);
+  getImplementationProgress(oemId: string | null): Observable<ServerResponseWithBody<ImplementationProgress>> {
+    return this.restService.read<ServerResponseWithBody<ImplementationProgress>>(
+      getUrlPathFragment('dashboard', 'implementation-progress', oemId)
+    );
   }
 
-  confirmASN(): Observable<boolean> {
-    const promise = new Promise<boolean>(resolve => {
-      setTimeout(() => {
-        this.mockOnboardingProgress.percentage = 45;
-        this.mockOnboardingProgress.completedSteps = 3;
-        this.mockOnboardingProgress.steps[1].status = 'completed';
-        this.mockOnboardingProgress.steps[2].status = 'current';
-        resolve(true);
-      }, 2000);
-    });
-
-    return from(promise);
+  getDashboardStats(oemId: string | null): Observable<ServerResponseWithBody<DashboardStats>> {
+    return this.restService.read<ServerResponseWithBody<DashboardStats>>(
+      getUrlPathFragment('dashboard', 'stats', oemId)
+    );
   }
+
+
+  confirmASN(): Observable<ServerResponseWithBody<any>> {
+    const confirmationData = {
+      timestamp: new Date().toISOString(),
+      status: 'CONFIRMED'
+    };
+
+    return this.restService.post<any, ServerResponseWithBody<any>>(
+      getUrlPathFragment('onboarding', 'confirm-asn'),
+      confirmationData
+    );
+  }
+
+   // API Methods for Onboarding Component   // --------------------------------------
+  getOnboardingProgressByOEM(oemId: string | null): Observable<ServerResponseWithBody<OnboardingProgress>> {
+    return this.restService.read<ServerResponseWithBody<OnboardingProgress>>(
+      getUrlPathFragment('onboarding', 'progress', oemId)
+    );
+  }
+
+  getOnboardingCredentials(oemId: string | null): Observable<ServerResponseWithBody<any>> {
+    return this.restService.read<ServerResponseWithBody<any>>(
+      getUrlPathFragment('onboarding', 'credentials', oemId)
+    );
+  }
+
+  getCredentialsById(credentialId: string): Observable<CredentialsResponse> {
+    return this.restService.read<CredentialsResponse>(
+      getUrlPathFragment('onboarding', 'credentials', credentialId)
+    );
+  }
+
+  createCredentials(payload: CreateCredentialsRequest): Observable<CredentialsResponse> {
+    return this.restService.post<CreateCredentialsRequest, CredentialsResponse>(
+      getUrlPathFragment('onboarding', 'create-credentials'),
+      payload
+    );
+  }
+
+  selectDeployment(payload: SelectDeploymentRequest): Observable<ServerResponseWithBody<any>> {
+    return this.restService.post<SelectDeploymentRequest, ServerResponseWithBody<any>>(
+      getUrlPathFragment('onboarding', 'select-deployment'),
+      payload
+    );
+  }
+
+  confirmASNOnboarding(confirmationData: ConfirmationData): Observable<ServerResponseWithBody<ConfirmationData>> {
+    // const confirmationData = {
+    //   timestamp: new Date().toISOString(),
+    //   status: 'CONFIRMED'
+    // };
+
+    return this.restService.post<any, ServerResponseWithBody<ConfirmationData>>(
+      getUrlPathFragment('onboarding', 'confirm-asn'),
+      confirmationData
+    );
+  }
+
+  // --------------------------------------
 }

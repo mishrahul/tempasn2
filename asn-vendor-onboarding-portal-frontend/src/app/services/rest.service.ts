@@ -23,6 +23,7 @@ export class RestService {
     const headers = mergeHeaders(options?.headers);
     return this.http.delete<T>(`${environment.baseUrl}${urlFragment}`, { headers });
   }
+
   deleteWithBody<T>(urlFragment: string, body?: any, options?: { headers?: HttpHeaders}): Observable<T> {
     const httpOptions = {
       headers: mergeHeaders(options?.headers),
@@ -33,6 +34,7 @@ export class RestService {
       map(response => response as T) // Cast response to type T
     );
   }
+  
   readBlob(urlFragment: string, options?: { headers?: HttpHeaders}) {
     const headers = mergeHeaders(options?.headers);
     return this.http.get(`${environment.baseUrl}${urlFragment}`, {

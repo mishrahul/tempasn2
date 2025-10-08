@@ -5,7 +5,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgOtpInputModule } from 'ng-otp-input';
 import { NotificationService } from '../../services/notification.service';
-import { LoginApiService } from 'src/app/services/login-service/login-api.service';
 import { PRODUCT } from 'src/app/services/_static/product-constants';
 import { map } from 'rxjs';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -27,7 +26,7 @@ export class TwoFactorFormComponent {
 
   constructor(
     private router: Router,
-    private loginApiService: LoginApiService,
+    private authService: AuthService,
     private notificationService: NotificationService,
   ) {
     this.email = sessionStorage.getItem('email') || ''
@@ -60,10 +59,10 @@ export class TwoFactorFormComponent {
       jwt: ''
     };
 
-    this.loginApiService.verifyOtp(payload)
+    this.authService.verifyOtp(payload)
     .pipe(
       map((v) => {
-        return this.loginApiService.setJwt(v.jwt);
+        return this.authService.setJwt(v.jwt);
       })
     )
     .subscribe({
@@ -91,7 +90,7 @@ export class TwoFactorFormComponent {
     };
 
     // You can call resend API here
-    this.loginApiService.resendOtp(payload).subscribe({
+    this.authService.resendOtp(payload).subscribe({
       next: () => {
         this.notificationService.success('OTP resent successfully');
         this.startResendTimer(30); // 30 seconds timer

@@ -9,6 +9,22 @@ import in.taxgenie.viewmodels.onboarding.*;
 public interface IOnboardingService {
 
     /**
+     * Register a new vendor (public endpoint - no authentication required)
+     *
+     * @param request Vendor registration request
+     * @param auth
+     * @return Vendor registration response with access tokens
+     */
+    VendorRegistrationResponseViewModel registerVendor(VendorRegistrationRequestViewModel request, IAuthContextViewModel auth);
+
+    /**
+     * Check if vendor is registered using companyCode from authentication token
+     * @param auth Authentication context containing companyCode
+     * @return Vendor check response with registration status
+     */
+    VendorCheckResponseViewModel checkVendorRegistration(IAuthContextViewModel auth);
+
+    /**
      * Get onboarding progress for the current vendor
      * @param auth Authentication context
      * @param oemId OEM ID

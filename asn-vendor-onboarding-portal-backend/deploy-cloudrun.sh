@@ -14,10 +14,11 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_ID="noble-stratum-393405"
-REGION="us-central1"
+REGION="asia-south1"
 SERVICE_NAME="asn-vendor-portal-backend"
-IMAGE_NAME="us-central1-docker.pkg.dev/$PROJECT_ID/asn-backend/$SERVICE_NAME"
+IMAGE_NAME="asia-south1-docker.pkg.dev/$PROJECT_ID/asn-backend/$SERVICE_NAME"
 
+echo -e "${BLUE}📍 IMAGE_NAME: $IMAGE_NAME${NC}"
 echo -e "${BLUE}🚀 Starting deployment to Google Cloud Run...${NC}"
 echo -e "${BLUE}📋 Project: $PROJECT_ID${NC}"
 echo -e "${BLUE}📍 Region: $REGION${NC}"

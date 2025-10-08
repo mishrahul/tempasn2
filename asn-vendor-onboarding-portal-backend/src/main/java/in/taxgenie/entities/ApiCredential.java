@@ -77,7 +77,7 @@ public class ApiCredential extends BaseEntity {
     @NotNull
     @JdbcTypeCode(SqlTypes.JSON)
     @Builder.Default
-    @Column(name = "rate_limits", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "rate_limits", nullable = true, columnDefinition = "jsonb")
     private String rateLimits = """
         {
             "per_minute": 60,

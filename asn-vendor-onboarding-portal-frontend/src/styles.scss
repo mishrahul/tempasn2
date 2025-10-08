@@ -295,3 +295,8 @@ body {
 .cursor-pointer {
   cursor: pointer !important;
 }
+
+.required::after {
+  content: ' *' !important;
+  color: red !important;
+}
