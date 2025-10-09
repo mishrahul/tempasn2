@@ -443,20 +443,29 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                 .build(),
             OnboardingProgressViewModel.StepProgressViewModel.builder()
                 .id(3)
-                .title("Payment")
-                .description("Pay based on Deployment Method Selection")
-                .status(getStepStatus(process.getCurrentStep(), "PAYMENT"))
-                .estimatedDurationHours(1)
-                .dependencies(List.of("ASN 2.1 Confirmation"))
-                .build(),
-            OnboardingProgressViewModel.StepProgressViewModel.builder()
-                .id(4)
                 .title("Deployment Method Selection")
                 .description("Choose between self-deployment or assisted implementation")
                 .status(getStepStatus(process.getCurrentStep(), "DEPLOYMENT"))
                 .estimatedDurationHours(2)
-                .dependencies(List.of("Payment"))
+                .dependencies(List.of("ASN 2.1 Confirmation"))
+                .build(),
+            OnboardingProgressViewModel.StepProgressViewModel.builder()
+                .id(4)
+                .title("Payment")
+                .description("Pay based on Deployment Method Selection")
+                .status(getStepStatus(process.getCurrentStep(), "PAYMENT"))
+                .estimatedDurationHours(1)
+                .dependencies(List.of("Deployment Method Selection"))
+                .build(),
+            OnboardingProgressViewModel.StepProgressViewModel.builder()
+                .id(5)
+                .title("e-Sakha Details")
+                .description("Configure your API credentials")
+                .status(getStepStatus(process.getCurrentStep(), "ESAKHA_DETAILS"))
+                .estimatedDurationHours(1)
+                .dependencies(Collections.emptyList())
                 .build()
+
         );
 
         int completedSteps = (int) steps.stream()
@@ -475,7 +484,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     }
 
     private OnboardingProgressViewModel.StepStatus getStepStatus(String currentStep, String stepName) {
-        List<String> stepOrder = Arrays.asList("CONFIRMATION", "PAYMENT", "DEPLOYMENT", "COMPLETION");
+        List<String> stepOrder = Arrays.asList("CONFIRMATION", "DEPLOYMENT", "PAYMENT", "ESAKHA_DETAILS", "COMPLETION");
         int currentIndex = stepOrder.indexOf(currentStep);
         int stepIndex = stepOrder.indexOf(stepName);
         
@@ -490,10 +499,11 @@ public class OnboardingServiceImplementation implements IOnboardingService {
 
     private String getNextStep(String currentStep) {
         Map<String, String> nextSteps = Map.of(
-            "CONFIRMATION", "PAYMENT",
-            "PAYMENT", "DEPLOYMENT",
-            "DEPLOYMENT", "COMPLETION",
-            "COMPLETION", "COMPLETED"
+            "CONFIRMATION", "DEPLOYMENT",
+            "DEPLOYMENT", "PAYMENT",
+            "PAYMENT", "ESAKHA_DETAILS",
+            "ESAKHA_DETAILS", "COMPLETION",
+                "COMPLETION", "COMPLETED"
         );
         return nextSteps.getOrDefault(currentStep, "UNKNOWN");
     }
@@ -501,8 +511,9 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     private Integer calculateEstimatedDays(String currentStep) {
         Map<String, Integer> estimatedDays = Map.of(
             "CONFIRMATION", 3,
+                "DEPLOYMENT", 1,
             "PAYMENT", 2,
-            "DEPLOYMENT", 1,
+            "ESAKHA_DETAILS", 1,
             "COMPLETION", 0
         );
         return estimatedDays.getOrDefault(currentStep, 5);

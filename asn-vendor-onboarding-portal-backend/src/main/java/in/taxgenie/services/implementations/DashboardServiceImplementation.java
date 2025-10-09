@@ -551,21 +551,19 @@ public class DashboardServiceImplementation implements IDashboardService {
 
 
     private DashboardStatsViewModel.CriticalAlertViewModel buildCriticalAlert(long daysRemaining, int progress) {
-        if (daysRemaining <= 7) {
-            return DashboardStatsViewModel.CriticalAlertViewModel.builder()
-                    .type("error")
-                    .title("Urgent Action Required")
-                    .message("Less than 7 days remaining for ASN 2.1 migration deadline!")
-                    .actionRequired(true)
-                    .actionUrl("/onboarding")
-                    .build();
-        }
-
-        else if (daysRemaining <= 30 && progress < 80) {
+        if (daysRemaining <= 30 && progress < 80) {
             return DashboardStatsViewModel.CriticalAlertViewModel.builder()
                 .type("warning")
                 .title("Critical Deadline")
                 .message("30th September 2025 - ASN 2.1 migration must be completed by this date to ensure continuity of your Auto ASN functionalities.")
+                .actionRequired(true)
+                .actionUrl("/onboarding")
+                .build();
+        } else if (daysRemaining <= 7) {
+            return DashboardStatsViewModel.CriticalAlertViewModel.builder()
+                .type("error")
+                .title("Urgent Action Required")
+                .message("Less than 7 days remaining for ASN 2.1 migration deadline!")
                 .actionRequired(true)
                 .actionUrl("/onboarding")
                 .build();
