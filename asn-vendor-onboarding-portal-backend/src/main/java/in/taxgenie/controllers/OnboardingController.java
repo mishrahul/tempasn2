@@ -137,6 +137,22 @@ public class OnboardingController {
         }
     }
 
+    @GetMapping("/vendor/by-gstin/{gstin}")
+    public ResponseEntity<IServerResponseWithBody<VendorCodesViewModel>> findVendorCodesByGstin(@PathVariable String gstin) {
+        log.info("Received request to find vendor codes by GSTIN: {}", gstin);
+        try {
+            VendorCodesViewModel viewModel = onboardingService.findVendorCodesByGstin(gstin);
+            IServerResponseWithBody<VendorCodesViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(200, "Search completed successfully.", true, viewModel);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error finding vendor codes by GSTIN: {}", gstin, e);
+            IServerResponseWithBody<VendorCodesViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(500, "An unexpected error occurred.", false, null);
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
     /**
      * Confirm ASN 2.1 activation
      *

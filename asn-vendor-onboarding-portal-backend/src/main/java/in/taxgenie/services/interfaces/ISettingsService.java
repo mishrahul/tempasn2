@@ -76,4 +76,44 @@ public interface ISettingsService {
      * @return Switch response
      */
     OemSwitchResponseViewModel switchOem(IAuthContextViewModel auth, OemSwitchRequestViewModel request);
+
+    /**
+     * Get vendor code management information
+     * @param auth Authentication context
+     * @return Vendor code management details
+     */
+    VendorCodeManagementViewModel getVendorCodeManagement(IAuthContextViewModel auth);
+
+    /**
+     * Get vendor codes for a specific GSTIN
+     * @param auth Authentication context
+     * @param gstinId GSTIN ID
+     * @return Vendor code management details for the GSTIN
+     */
+    VendorCodeManagementViewModel getVendorCodesByGstin(IAuthContextViewModel auth, String gstinId);
+
+    /**
+     * Create new vendor code
+     * @param auth Authentication context
+     * @param request Vendor code creation request
+     * @return Created vendor code details
+     */
+    VendorCodeManagementViewModel.VendorCodeDetailViewModel createVendorCode(IAuthContextViewModel auth, VendorCodeCreateRequestViewModel request);
+
+    /**
+     * Update vendor code
+     * @param auth Authentication context
+     * @param vendorCodeId Vendor code ID
+     * @param request Update request
+     * @return Updated vendor code details
+     */
+    VendorCodeManagementViewModel.VendorCodeDetailViewModel updateVendorCode(IAuthContextViewModel auth, String vendorCodeId, VendorCodeUpdateRequestViewModel request);
+
+    /**
+     * Delete vendor code
+     * @param auth Authentication context
+     * @param vendorCodeId Vendor code ID
+     * @return Success status
+     */
+    boolean deleteVendorCode(IAuthContextViewModel auth, String vendorCodeId);
 }

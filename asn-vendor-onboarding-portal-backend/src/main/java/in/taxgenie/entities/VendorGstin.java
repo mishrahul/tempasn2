@@ -3,6 +3,7 @@ package in.taxgenie.entities;
 import in.taxgenie.entities.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -65,6 +68,12 @@ public class VendorGstin extends BaseEntity {
 
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
+
+    // Relationships
+    @OneToMany(mappedBy = "vendorGstin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @Builder.Default
+    private Set<VendorCode> vendorCodes = new HashSet<>();
 
     @Override
     public String toString() {

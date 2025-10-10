@@ -178,4 +178,7 @@ public interface VendorGstinRepository extends BaseRepository<VendorGstin> {
      */
     @Query("SELECT vg FROM VendorGstin vg WHERE vg.gstinId = :gstinId AND vg.companyCode = :companyCode")
     Optional<VendorGstin> findByGstinIdAndCompanyCode(@Param("gstinId") UUID gstinId, @Param("companyCode") Long companyCode);
+
+    Optional<VendorGstin> findByGstinIgnoreCase(String gstin);
+
 }

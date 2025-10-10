@@ -37,6 +37,10 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     private final SubscriptionRepository subscriptionRepository;
     private final OnboardingEventRepository onboardingEventRepository;
 
+    private final VendorGstinRepository vendorGstinRepository;
+    private final VendorOemAccessRepository vendorOemAccessRepository; // <-- Inject this repository
+
+
     @Override
     public VendorRegistrationResponseViewModel registerVendor(VendorRegistrationRequestViewModel request, IAuthContextViewModel auth) {
         log.info("Registering new vendor: {}", request.getCompanyName());
@@ -206,6 +210,65 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             log.error("Error checking vendor registration for companyCode: {}", auth.getCompanyCode(), e);
             throw new RuntimeException("Failed to check vendor registration: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VendorCodesViewModel findVendorCodesByGstin(String gstin) {
+        log.info("Searching for vendor codes associated with GSTIN: {}", gstin);
+
+        // 1. Find the GSTIN record (this part is the same as before).
+        Optional<VendorGstin> gstinOptional = vendorGstinRepository.findByGstinIgnoreCase(gstin);
+
+        if (gstinOptional.isEmpty()) {
+            // If no GSTIN is found, return an empty list.
+            return VendorCodesViewModel.builder()
+                    .gstin(gstin)
+                    .vendorCodes(Collections.emptyList())
+                    .build();
+        }
+
+        // 2. Get the associated Vendor object.
+        Vendor vendor = gstinOptional.get().getVendor();
+
+        // 3. Use the new repository method to find all OEM access records for that vendor.
+        List<VendorOemAccess> accessRecords = vendorOemAccessRepository.findByVendor(vendor);
+
+        // 4. Extract just the vendor_code from each record into a list.
+        List<String> vendorCodes = accessRecords.stream()
+                .map(VendorOemAccess::getVendorCode)
+                .collect(Collectors.toList());
+
+        log.info("Found {} vendor codes for GSTIN: {}", vendorCodes.size(), gstin);
+
+        // 5. Build the new response ViewModel.
+        return VendorCodesViewModel.builder()
+                .gstin(gstin)
+                .vendorId(vendor.getVendorId())
+                .companyName(vendor.getCompanyName())
+                .vendorCodes(vendorCodes)
+                .build();
+    }
+
+    /**
+     * Helper method to build the VendorCheckResponseViewModel from a Vendor entity.
+     * This can be extracted from your existing checkVendorRegistration method for reusability.
+     */
+    private VendorCheckResponseViewModel buildVendorCheckResponse(Vendor vendor) {
+        // This logic can be shared to ensure consistent responses
+        String vendorCode = "V" + vendor.getVendorId().toString().substring(0, 8).toUpperCase();
+
+        return VendorCheckResponseViewModel.builder()
+                .isRegistered(true)
+                .vendorId(vendor.getVendorId().toString())
+                .vendorCode(vendorCode)
+                .companyName(vendor.getCompanyName())
+                .panNumber(vendor.getPanNumber())
+                .status(vendor.getStatus().name())
+                .registeredAt(vendor.getCreatedAt())
+                // You can add contact info parsing here if needed
+                .message("Vendor found successfully.")
+                .build();
     }
 
     /**
@@ -459,9 +522,9 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                 .build(),
             OnboardingProgressViewModel.StepProgressViewModel.builder()
                 .id(5)
-                .title("e-Sakha Details")
+                .title("Service Details")
                 .description("Configure your API credentials")
-                .status(getStepStatus(process.getCurrentStep(), "ESAKHA_DETAILS"))
+                .status(getStepStatus(process.getCurrentStep(), "SERVICE_DETAILS"))
                 .estimatedDurationHours(1)
                 .dependencies(Collections.emptyList())
                 .build()
@@ -484,7 +547,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     }
 
     private OnboardingProgressViewModel.StepStatus getStepStatus(String currentStep, String stepName) {
-        List<String> stepOrder = Arrays.asList("CONFIRMATION", "DEPLOYMENT", "PAYMENT", "ESAKHA_DETAILS", "COMPLETION");
+        List<String> stepOrder = Arrays.asList("CONFIRMATION", "DEPLOYMENT", "PAYMENT", "SERVICE_DETAILS", "COMPLETION");
         int currentIndex = stepOrder.indexOf(currentStep);
         int stepIndex = stepOrder.indexOf(stepName);
         
@@ -501,10 +564,11 @@ public class OnboardingServiceImplementation implements IOnboardingService {
         Map<String, String> nextSteps = Map.of(
             "CONFIRMATION", "DEPLOYMENT",
             "DEPLOYMENT", "PAYMENT",
-            "PAYMENT", "ESAKHA_DETAILS",
-            "ESAKHA_DETAILS", "COMPLETION",
+            "PAYMENT", "SERVICE_DETAILS",
+            "SERVICE_DETAILS", "COMPLETION",
                 "COMPLETION", "COMPLETED"
         );
+        log.info(currentStep);
         return nextSteps.getOrDefault(currentStep, "UNKNOWN");
     }
 
@@ -513,7 +577,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             "CONFIRMATION", 3,
                 "DEPLOYMENT", 1,
             "PAYMENT", 2,
-            "ESAKHA_DETAILS", 1,
+            "SERVICE_DETAILS", 1,
             "COMPLETION", 0
         );
         return estimatedDays.getOrDefault(currentStep, 5);

@@ -2,6 +2,7 @@ package in.taxgenie.services.implementations;
 
 import in.taxgenie.auth.IAuthContextViewModel;
 import in.taxgenie.entities.*;
+import in.taxgenie.entities.enums.Status;
 import in.taxgenie.repositories.*;
 import in.taxgenie.services.interfaces.ISettingsService;
 import in.taxgenie.services.UserSessionService;
@@ -51,6 +52,9 @@ public class SettingsServiceImplementation implements ISettingsService {
 
     @Autowired
     private UserSessionService userSessionService;
+
+    @Autowired
+    private VendorCodeRepository vendorCodeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -679,4 +683,223 @@ public class SettingsServiceImplementation implements ISettingsService {
             return new HashMap<>();
         }
     }
+//<<<<<<< Updated upstream
+//=======
+
+    /**
+     * Update vendor status based on GSTIN availability
+     * Status is ACTIVE if at least one GSTIN exists, otherwise INACTIVE
+     *
+     * @param vendor the vendor to update
+     */
+    private void updateVendorStatusBasedOnGstins(Vendor vendor) {
+        try {
+            long gstinCount = vendorGstinRepository.countByVendor(vendor);
+
+            Status newStatus = gstinCount > 0 ? Status.ACTIVE : Status.INACTIVE;
+
+            // Only update if status has changed
+            if (vendor.getStatus() != newStatus) {
+                vendor.setStatus(newStatus);
+                vendor.setUpdatedAt(LocalDateTime.now());
+                vendorRepository.save(vendor);
+
+                logger.info("Updated vendor {} status to {} based on GSTIN count: {}",
+                    vendor.getVendorId(), newStatus, gstinCount);
+            }
+        } catch (Exception e) {
+            logger.error("Error updating vendor status for vendor: {}", vendor.getVendorId(), e);
+            // Don't throw exception - this is a secondary operation
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VendorCodeManagementViewModel getVendorCodeManagement(IAuthContextViewModel auth) {
+        logger.info("Getting vendor code management for vendor: {}", auth.getUserId());
+
+        try {
+            Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
+                    .orElseThrow(() -> new RuntimeException("Vendor not found"));
+
+            // Get all GSTINs for the vendor
+            List<VendorGstin> vendorGstins = vendorGstinRepository.findByVendorAndCompanyCode(vendor, auth.getCompanyCode());
+
+            // Get all vendor codes for all GSTINs
+            List<VendorCode> allVendorCodes = new ArrayList<>();
+            for (VendorGstin gstin : vendorGstins) {
+                List<VendorCode> codes = vendorCodeRepository.findByVendorGstinAndCompanyCode(gstin, auth.getCompanyCode());
+                allVendorCodes.addAll(codes);
+            }
+
+            List<VendorCodeManagementViewModel.VendorCodeDetailViewModel> vendorCodeDetails = allVendorCodes.stream()
+                    .map(this::mapToVendorCodeDetailViewModel)
+                    .collect(Collectors.toList());
+
+            int activeCount = (int) allVendorCodes.stream().filter(vc -> Status.ACTIVE.equals(vc.getStatus())).count();
+            int inactiveCount = allVendorCodes.size() - activeCount;
+
+            return VendorCodeManagementViewModel.builder()
+                    .vendorCodes(vendorCodeDetails)
+                    .totalCount(allVendorCodes.size())
+                    .activeCount(activeCount)
+                    .inactiveCount(inactiveCount)
+                    .build();
+
+        } catch (Exception e) {
+            logger.error("Error getting vendor code management for vendor: {}", auth.getUserId(), e);
+            throw new RuntimeException("Failed to get vendor code management: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VendorCodeManagementViewModel getVendorCodesByGstin(IAuthContextViewModel auth, String gstinId) {
+        logger.info("Getting vendor codes for GSTIN {} and vendor: {}", gstinId, auth.getUserId());
+
+        try {
+            VendorGstin vendorGstin = vendorGstinRepository.findByGstinIdAndCompanyCode(UUID.fromString(gstinId), auth.getCompanyCode())
+                    .orElseThrow(() -> new RuntimeException("GSTIN not found"));
+
+            // Verify ownership
+            if (!vendorGstin.getVendor().getUserId().equals(auth.getUserId())) {
+                throw new RuntimeException("Access denied");
+            }
+
+            List<VendorCode> vendorCodes = vendorCodeRepository.findByVendorGstinAndCompanyCode(vendorGstin, auth.getCompanyCode());
+
+            List<VendorCodeManagementViewModel.VendorCodeDetailViewModel> vendorCodeDetails = vendorCodes.stream()
+                    .map(this::mapToVendorCodeDetailViewModel)
+                    .collect(Collectors.toList());
+
+            int activeCount = (int) vendorCodes.stream().filter(vc -> Status.ACTIVE.equals(vc.getStatus())).count();
+            int inactiveCount = vendorCodes.size() - activeCount;
+
+            return VendorCodeManagementViewModel.builder()
+                    .vendorCodes(vendorCodeDetails)
+                    .totalCount(vendorCodes.size())
+                    .activeCount(activeCount)
+                    .inactiveCount(inactiveCount)
+                    .build();
+
+        } catch (Exception e) {
+            logger.error("Error getting vendor codes for GSTIN {} and vendor: {}", gstinId, auth.getUserId(), e);
+            throw new RuntimeException("Failed to get vendor codes: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public VendorCodeManagementViewModel.VendorCodeDetailViewModel createVendorCode(IAuthContextViewModel auth, VendorCodeCreateRequestViewModel request) {
+        logger.info("Creating vendor code for GSTIN {} and vendor: {}", request.getGstinId(), auth.getUserId());
+
+        try {
+            VendorGstin vendorGstin = vendorGstinRepository.findByGstinIdAndCompanyCode(UUID.fromString(request.getGstinId()), auth.getCompanyCode())
+                    .orElseThrow(() -> new RuntimeException("GSTIN not found"));
+
+            // Verify ownership
+            if (!vendorGstin.getVendor().getUserId().equals(auth.getUserId())) {
+                throw new RuntimeException("Access denied");
+            }
+
+            // Check if vendor code already exists
+            if (vendorCodeRepository.existsByVendorCodeAndCompanyCode(request.getVendorCode(), auth.getCompanyCode())) {
+                throw new RuntimeException("Vendor code already exists");
+            }
+
+            VendorCode vendorCode = VendorCode.builder()
+                    .vendorGstin(vendorGstin)
+                    .vendorCode(request.getVendorCode())
+                    .description(request.getDescription())
+                    .status(Status.ACTIVE)
+                    .build();
+
+            // Set company code from BaseEntity
+            vendorCode.setCompanyCode(auth.getCompanyCode());
+
+            vendorCode = vendorCodeRepository.save(vendorCode);
+
+            return mapToVendorCodeDetailViewModel(vendorCode);
+
+        } catch (Exception e) {
+            logger.error("Error creating vendor code for vendor: {}", auth.getUserId(), e);
+            throw new RuntimeException("Failed to create vendor code: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public VendorCodeManagementViewModel.VendorCodeDetailViewModel updateVendorCode(IAuthContextViewModel auth, String vendorCodeId, VendorCodeUpdateRequestViewModel request) {
+        logger.info("Updating vendor code {} for vendor: {}", vendorCodeId, auth.getUserId());
+
+        try {
+            VendorCode vendorCode = vendorCodeRepository.findByVendorCodeIdAndCompanyCode(UUID.fromString(vendorCodeId), auth.getCompanyCode())
+                    .orElseThrow(() -> new RuntimeException("Vendor code not found"));
+
+            // Verify ownership
+            if (!vendorCode.getVendorGstin().getVendor().getUserId().equals(auth.getUserId())) {
+                throw new RuntimeException("Access denied");
+            }
+
+            // Update fields
+            if (request.getDescription() != null) {
+                vendorCode.setDescription(request.getDescription());
+            }
+
+            if (request.getStatus() != null) {
+                vendorCode.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
+            }
+
+            vendorCode.setUpdatedAt(LocalDateTime.now());
+            vendorCode = vendorCodeRepository.save(vendorCode);
+
+            return mapToVendorCodeDetailViewModel(vendorCode);
+
+        } catch (Exception e) {
+            logger.error("Error updating vendor code {} for vendor: {}", vendorCodeId, auth.getUserId(), e);
+            throw new RuntimeException("Failed to update vendor code: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean deleteVendorCode(IAuthContextViewModel auth, String vendorCodeId) {
+        logger.info("Deleting vendor code {} for vendor: {}", vendorCodeId, auth.getUserId());
+
+        try {
+            VendorCode vendorCode = vendorCodeRepository.findByVendorCodeIdAndCompanyCode(UUID.fromString(vendorCodeId), auth.getCompanyCode())
+                    .orElseThrow(() -> new RuntimeException("Vendor code not found"));
+
+            // Verify ownership
+            if (!vendorCode.getVendorGstin().getVendor().getUserId().equals(auth.getUserId())) {
+                throw new RuntimeException("Access denied");
+            }
+
+            vendorCodeRepository.delete(vendorCode);
+            return true;
+
+        } catch (Exception e) {
+            logger.error("Error deleting vendor code {} for vendor: {}", vendorCodeId, auth.getUserId(), e);
+            throw new RuntimeException("Failed to delete vendor code: " + e.getMessage());
+        }
+    }
+
+    private VendorCodeManagementViewModel.VendorCodeDetailViewModel mapToVendorCodeDetailViewModel(VendorCode vendorCode) {
+        VendorGstin gstin = vendorCode.getVendorGstin();
+
+        return VendorCodeManagementViewModel.VendorCodeDetailViewModel.builder()
+                .vendorCodeId(vendorCode.getVendorCodeId().toString())
+                .vendorCode(vendorCode.getVendorCode())
+                .description(vendorCode.getDescription())
+                .status(vendorCode.getStatus().toString())
+                .gstinInfo(VendorCodeManagementViewModel.GstinInfoViewModel.builder()
+                        .gstinId(gstin.getGstinId().toString())
+                        .gstin(gstin.getGstin())
+                        .stateCode(gstin.getStateCode())
+                        .stateName(getStateName(gstin.getStateCode()))
+                        .isPrimary(gstin.getIsPrimary())
+                        .isVerified(gstin.getIsVerified())
+                        .build())
+                .createdAt(vendorCode.getCreatedAt() != null ? vendorCode.getCreatedAt().format(DATE_FORMATTER) : null)
+                .updatedAt(vendorCode.getUpdatedAt() != null ? vendorCode.getUpdatedAt().format(DATE_FORMATTER) : null)
+                .build();
+    }
+//>>>>>>> Stashed changes
 }

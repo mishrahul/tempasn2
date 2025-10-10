@@ -112,4 +112,7 @@ public interface IOnboardingService {
      * @return Completion status
      */
     OnboardingCompletionViewModel completeOnboarding(IAuthContextViewModel auth, String oemId);
+
+    VendorCodesViewModel findVendorCodesByGstin(String gstin);
+
 }

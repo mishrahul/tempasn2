@@ -251,4 +251,123 @@ public class SettingsController {
                     .body(ServerResponseFactory.error("Failed to switch OEM access"));
         }
     }
+
+    // ==================== Vendor Code Management APIs ====================
+
+    @Operation(summary = "Get all vendor codes", description = "Retrieve all vendor codes for the authenticated vendor")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Vendor codes retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Vendor not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/vendor-codes")
+    public ResponseEntity<ServerResponseViewModel<VendorCodeManagementViewModel>> getVendorCodes() {
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            log.info("Getting vendor codes for vendor: {}", auth.getUserId());
+
+            VendorCodeManagementViewModel response = settingsService.getVendorCodeManagement(auth);
+            return ResponseEntity.ok(ServerResponseFactory.success(response, "Vendor codes retrieved successfully"));
+        } catch (Exception e) {
+            log.error("Error getting vendor codes", e);
+            return ResponseEntity.internalServerError()
+                    .body(ServerResponseFactory.error("Failed to get vendor codes"));
+        }
+    }
+
+    @Operation(summary = "Get vendor codes by GSTIN", description = "Retrieve vendor codes for a specific GSTIN")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Vendor codes retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "GSTIN not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/vendor-codes/gstin/{gstinId}")
+    public ResponseEntity<ServerResponseViewModel<VendorCodeManagementViewModel>> getVendorCodesByGstin(
+            @PathVariable UUID gstinId) {
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            log.info("Getting vendor codes for GSTIN {} and vendor: {}", gstinId, auth.getUserId());
+
+            VendorCodeManagementViewModel response = settingsService.getVendorCodesByGstin(auth, gstinId.toString());
+            return ResponseEntity.ok(ServerResponseFactory.success(response, "Vendor codes retrieved successfully"));
+        } catch (Exception e) {
+            log.error("Error getting vendor codes for GSTIN {}", gstinId, e);
+            return ResponseEntity.internalServerError()
+                    .body(ServerResponseFactory.error("Failed to get vendor codes"));
+        }
+    }
+
+    @Operation(summary = "Create vendor code", description = "Create a new vendor code for a GSTIN")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Vendor code created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "409", description = "Vendor code already exists"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/vendor-codes")
+    public ResponseEntity<ServerResponseViewModel<VendorCodeManagementViewModel.VendorCodeDetailViewModel>> createVendorCode(
+            @Valid @RequestBody VendorCodeCreateRequestViewModel request) {
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            log.info("Creating vendor code for vendor: {}", auth.getUserId());
+
+            VendorCodeManagementViewModel.VendorCodeDetailViewModel response = settingsService.createVendorCode(auth, request);
+            return ResponseEntity.status(201)
+                    .body(ServerResponseFactory.success(response, "Vendor code created successfully"));
+        } catch (Exception e) {
+            log.error("Error creating vendor code", e);
+            return ResponseEntity.internalServerError()
+                    .body(ServerResponseFactory.error("Failed to create vendor code"));
+        }
+    }
+
+    @Operation(summary = "Update vendor code", description = "Update an existing vendor code")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Vendor code updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Vendor code not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/vendor-codes/{vendorCodeId}")
+    public ResponseEntity<ServerResponseViewModel<VendorCodeManagementViewModel.VendorCodeDetailViewModel>> updateVendorCode(
+            @PathVariable UUID vendorCodeId,
+            @Valid @RequestBody VendorCodeUpdateRequestViewModel request) {
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            log.info("Updating vendor code {} for vendor: {}", vendorCodeId, auth.getUserId());
+
+            VendorCodeManagementViewModel.VendorCodeDetailViewModel response = settingsService.updateVendorCode(auth, vendorCodeId.toString(), request);
+            return ResponseEntity.ok(ServerResponseFactory.success(response, "Vendor code updated successfully"));
+        } catch (Exception e) {
+            log.error("Error updating vendor code {}", vendorCodeId, e);
+            return ResponseEntity.internalServerError()
+                    .body(ServerResponseFactory.error("Failed to update vendor code"));
+        }
+    }
+
+    @Operation(summary = "Delete vendor code", description = "Delete a vendor code")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Vendor code deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Vendor code not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping("/vendor-codes/{vendorCodeId}")
+    public ResponseEntity<ServerResponseViewModel<Void>> deleteVendorCode(
+            @PathVariable UUID vendorCodeId) {
+
+        try {
+            IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
+            log.info("Deleting vendor code {} for vendor: {}", vendorCodeId, auth.getUserId());
+
+            settingsService.deleteVendorCode(auth, vendorCodeId.toString());
+            return ResponseEntity.ok(ServerResponseFactory.success(null, "Vendor code deleted successfully"));
+        } catch (Exception e) {
+            log.error("Error deleting vendor code {}", vendorCodeId, e);
+            return ResponseEntity.internalServerError()
+                    .body(ServerResponseFactory.error("Failed to delete vendor code"));
+        }
+    }
 }

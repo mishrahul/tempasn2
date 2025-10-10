@@ -200,4 +200,6 @@ public interface VendorOemAccessRepository extends BaseRepository<VendorOemAcces
      */
     @Query("SELECT voa FROM VendorOemAccess voa WHERE voa.vendor = :vendor AND voa.oem = :oem AND voa.companyCode = :companyCode")
     Optional<VendorOemAccess> findByVendorAndOemAndCompanyCode(@Param("vendor") Vendor vendor, @Param("oem") OemMaster oem, @Param("companyCode") Long companyCode);
+
+
 }
