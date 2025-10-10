@@ -113,6 +113,6 @@ public interface IOnboardingService {
      */
     OnboardingCompletionViewModel completeOnboarding(IAuthContextViewModel auth, String oemId);
 
-    VendorCodesViewModel findVendorCodesByGstin(String gstin);
+    VendorCheckResponseViewModel findVendorByGstin(String gstin);
 
 }

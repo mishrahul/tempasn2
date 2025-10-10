@@ -3,8 +3,11 @@ package in.taxgenie.repositories;
 import in.taxgenie.entities.Vendor;
 import in.taxgenie.entities.VendorGstin;
 import in.taxgenie.repositories.base.BaseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +22,7 @@ import java.util.UUID;
  * @version 1.0.0
  */
 @Repository
-public interface VendorGstinRepository extends BaseRepository<VendorGstin> {
+public interface VendorGstinRepository extends BaseRepository<VendorGstin>, PagingAndSortingRepository<VendorGstin, UUID> {
 
     /**
      * Find vendor GSTIN by GSTIN number
@@ -180,5 +183,9 @@ public interface VendorGstinRepository extends BaseRepository<VendorGstin> {
     Optional<VendorGstin> findByGstinIdAndCompanyCode(@Param("gstinId") UUID gstinId, @Param("companyCode") Long companyCode);
 
     Optional<VendorGstin> findByGstinIgnoreCase(String gstin);
+
+    Page<VendorGstin> findByVendorAndCompanyCode(Vendor vendor, Long companyCode, Pageable pageable);
+
+    long countByVendorAndCompanyCodeAndIsVerifiedTrue(Vendor vendor, Long companyCode);
 
 }

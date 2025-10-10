@@ -6,10 +6,12 @@ import in.taxgenie.entities.enums.Status;
 import in.taxgenie.repositories.*;
 import in.taxgenie.services.interfaces.ISettingsService;
 import in.taxgenie.services.UserSessionService;
+import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
 import in.taxgenie.viewmodels.settings.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Implementation of settings service
@@ -55,6 +58,9 @@ public class SettingsServiceImplementation implements ISettingsService {
 
     @Autowired
     private VendorCodeRepository vendorCodeRepository;
+
+    @Autowired
+    private ApiCredentialRepository apiCredentialRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -145,29 +151,35 @@ public class SettingsServiceImplementation implements ISettingsService {
 
     @Override
     @Transactional(readOnly = true)
-    public GstinManagementViewModel getGstinManagement(IAuthContextViewModel auth) {
-        logger.info("Getting GSTIN management for vendor: {}", auth.getUserId());
-        
+    public GstinManagementViewModel getGstinManagement(IAuthContextViewModel auth, Pageable pageable) {
+        logger.info("Getting paginated GSTIN management for vendor: {}, page: {}", auth.getUserId(), pageable.getPageNumber());
+
         try {
             Vendor vendor = vendorRepository.findByCompanyCode(auth.getCompanyCode())
                     .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
-            List<VendorGstin> vendorGstins = vendorGstinRepository.findByVendorAndCompanyCode(vendor, auth.getCompanyCode());
+            // Use the new paginated repository method
+            Page<VendorGstin> gstinPage = vendorGstinRepository.findByVendorAndCompanyCode(vendor, auth.getCompanyCode(), pageable);
 
-            List<GstinManagementViewModel.GstinDetailViewModel> gstinDetails = vendorGstins.stream()
-                    .map(this::mapToGstinDetailViewModel)
+            List<GstinManagementViewModel.GstinDetailViewModel> gstinDetails = gstinPage.getContent().stream()
+                    .map(this::mapToGstinDetailViewModel) // We will update this helper method
                     .collect(Collectors.toList());
 
-            int verifiedCount = (int) vendorGstins.stream().filter(VendorGstin::getIsVerified).count();
-            int pendingCount = vendorGstins.size() - verifiedCount;
+            // Get summary counts from the full list (this query is fast)
+            long totalCount = gstinPage.getTotalElements();
+            long verifiedCount = vendorGstinRepository.countByVendorAndCompanyCodeAndIsVerifiedTrue(vendor, auth.getCompanyCode());
+            long pendingCount = totalCount - verifiedCount;
 
             return GstinManagementViewModel.builder()
                     .gstinDetails(gstinDetails)
-                    .totalCount(vendorGstins.size())
-                    .verifiedCount(verifiedCount)
-                    .pendingCount(pendingCount)
+                    .totalCount((int) totalCount)
+                    .verifiedCount((int) verifiedCount)
+                    .pendingCount((int) pendingCount)
+                    .currentPage(gstinPage.getNumber())
+                    .totalPages(gstinPage.getTotalPages())
+                    .totalItems(gstinPage.getTotalElements())
                     .build();
-                    
+
         } catch (Exception e) {
             logger.error("Error getting GSTIN management for vendor: {}", auth.getUserId(), e);
             throw new RuntimeException("Failed to get GSTIN management: " + e.getMessage());
@@ -199,6 +211,7 @@ public class SettingsServiceImplementation implements ISettingsService {
                     .stateCode(request.getStateCode())
                     .isPrimary(request.isPrimary())
                     .isVerified(false)
+                    .vendorCode(request.getVendorCode())
                     .build();
 
             // Set company code from BaseEntity
@@ -275,19 +288,23 @@ public class SettingsServiceImplementation implements ISettingsService {
         }
     }
 
-    // Helper methods
     private GstinManagementViewModel.GstinDetailViewModel mapToGstinDetailViewModel(VendorGstin vendorGstin) {
+
+        boolean credentialsExist = apiCredentialRepository.existsByVendor(vendorGstin.getVendor());
+
+
         return GstinManagementViewModel.GstinDetailViewModel.builder()
                 .id(vendorGstin.getGstinId().toString())
                 .gstin(vendorGstin.getGstin())
                 .state(getStateName(vendorGstin.getStateCode()))
                 .stateCode(vendorGstin.getStateCode())
-                .vendorCode(generateVendorCodeForGstin(vendorGstin))
+                .vendorCode(vendorGstin.getVendorCode())
                 .isPrimary(vendorGstin.getIsPrimary())
                 .isVerified(vendorGstin.getIsVerified())
                 .verifiedAt(vendorGstin.getVerifiedAt() != null ? vendorGstin.getVerifiedAt().format(DATE_FORMATTER) : null)
                 .status(vendorGstin.getIsVerified() ? "VERIFIED" : "PENDING")
                 .createdAt(vendorGstin.getCreatedAt() != null ? vendorGstin.getCreatedAt().format(DATE_FORMATTER) : null)
+                .areCredentialsCreated(credentialsExist) // Set the new boolean flag
                 .build();
     }
 

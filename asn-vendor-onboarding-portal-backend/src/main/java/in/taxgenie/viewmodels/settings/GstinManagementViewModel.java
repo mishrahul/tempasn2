@@ -20,6 +20,11 @@ public class GstinManagementViewModel {
     private int totalCount;
     private int verifiedCount;
     private int pendingCount;
+
+    // Fields for pagination metadata
+    private int currentPage;
+    private int totalPages;
+    private long totalItems;
     
     @Data
     @Builder
@@ -36,5 +41,9 @@ public class GstinManagementViewModel {
         private String verifiedAt;
         private String status;
         private String createdAt;
+
+        //dummy
+        private boolean areCredentialsCreated;
+
     }
 }

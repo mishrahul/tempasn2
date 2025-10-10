@@ -138,17 +138,17 @@ public class OnboardingController {
     }
 
     @GetMapping("/vendor/by-gstin/{gstin}")
-    public ResponseEntity<IServerResponseWithBody<VendorCodesViewModel>> findVendorCodesByGstin(@PathVariable String gstin) {
-        log.info("Received request to find vendor codes by GSTIN: {}", gstin);
+    public ResponseEntity<IServerResponseWithBody<VendorCheckResponseViewModel>> findVendorByGstin(@PathVariable String gstin) {
+        log.info("Received request to find vendor by GSTIN: {}", gstin);
         try {
-            VendorCodesViewModel viewModel = onboardingService.findVendorCodesByGstin(gstin);
-            IServerResponseWithBody<VendorCodesViewModel> response = serverResponseFactory
-                    .getServerResponseWithBody(200, "Search completed successfully.", true, viewModel);
+            VendorCheckResponseViewModel vendorInfo = onboardingService.findVendorByGstin(gstin);
+            IServerResponseWithBody<VendorCheckResponseViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(200, "Vendor search completed.", true, vendorInfo);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Error finding vendor codes by GSTIN: {}", gstin, e);
-            IServerResponseWithBody<VendorCodesViewModel> response = serverResponseFactory
-                    .getServerResponseWithBody(500, "An unexpected error occurred.", false, null);
+            log.error("Error finding vendor by GSTIN: {}", gstin, e);
+            IServerResponseWithBody<VendorCheckResponseViewModel> response = serverResponseFactory
+                    .getServerResponseWithBody(500, "An unexpected error occurred while searching for the vendor.", false, null);
             return ResponseEntity.internalServerError().body(response);
         }
     }

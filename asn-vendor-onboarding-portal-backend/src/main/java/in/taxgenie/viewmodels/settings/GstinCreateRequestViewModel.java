@@ -26,6 +26,9 @@ public class GstinCreateRequestViewModel {
              message = "State code must be 2 digits")
     private String stateCode;
 
+    private String vendorCode;
+
+
     @Builder.Default
     private boolean isPrimary = false;
 }

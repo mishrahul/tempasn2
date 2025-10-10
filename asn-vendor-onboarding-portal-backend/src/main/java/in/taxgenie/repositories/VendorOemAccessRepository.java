@@ -6,6 +6,7 @@ import in.taxgenie.entities.VendorOemAccess;
 import in.taxgenie.entities.enums.AccessLevel;
 import in.taxgenie.entities.enums.AccessStatus;
 import in.taxgenie.repositories.base.BaseRepository;
+import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -201,5 +202,8 @@ public interface VendorOemAccessRepository extends BaseRepository<VendorOemAcces
     @Query("SELECT voa FROM VendorOemAccess voa WHERE voa.vendor = :vendor AND voa.oem = :oem AND voa.companyCode = :companyCode")
     Optional<VendorOemAccess> findByVendorAndOemAndCompanyCode(@Param("vendor") Vendor vendor, @Param("oem") OemMaster oem, @Param("companyCode") Long companyCode);
 
+    Optional<VendorOemAccess> findByVendorAndVendorCode(Vendor vendor, String vendorCode);
+
+    //ApiCredentialsResponseViewModel findCredentialByGstinAndVendorCode(String gstin, String vendorCode);
 
 }

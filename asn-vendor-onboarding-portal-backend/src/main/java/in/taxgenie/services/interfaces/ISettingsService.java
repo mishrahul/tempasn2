@@ -1,7 +1,9 @@
 package in.taxgenie.services.interfaces;
 
 import in.taxgenie.auth.IAuthContextViewModel;
+import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
 import in.taxgenie.viewmodels.settings.*;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service interface for settings management operations
@@ -28,7 +30,7 @@ public interface ISettingsService {
      * @param auth Authentication context
      * @return GSTIN management details
      */
-    GstinManagementViewModel getGstinManagement(IAuthContextViewModel auth);
+   // GstinManagementViewModel getGstinManagement(IAuthContextViewModel auth);
     
     /**
      * Create new GSTIN
@@ -116,4 +118,10 @@ public interface ISettingsService {
      * @return Success status
      */
     boolean deleteVendorCode(IAuthContextViewModel auth, String vendorCodeId);
+
+    GstinManagementViewModel getGstinManagement(IAuthContextViewModel auth, Pageable pageable);
+
+
+   // ApiCredentialsResponseViewModel findCredentialByGstinAndVendorCode(String gstin, String vendorCode);
+
 }

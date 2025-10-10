@@ -2,7 +2,9 @@ package in.taxgenie.controllers;
 
 import in.taxgenie.auth.IAuthContextFactory;
 import in.taxgenie.auth.IAuthContextViewModel;
+import in.taxgenie.response.interfaces.infra.IServerResponseWithBody;
 import in.taxgenie.services.interfaces.ISettingsService;
+import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
 import in.taxgenie.viewmodels.settings.*;
 import in.taxgenie.viewmodels.response.ServerResponseFactory;
 import in.taxgenie.viewmodels.response.ServerResponseViewModel;
@@ -13,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -93,20 +97,49 @@ public class SettingsController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/gstin-management")
-    public ResponseEntity<ServerResponseViewModel<GstinManagementViewModel>> getGstinManagement() {
+    // Update the method to accept a Pageable parameter
+    public ResponseEntity<ServerResponseViewModel<GstinManagementViewModel>> getGstinManagement(
+            @PageableDefault(page = 0, size = 5) Pageable pageable) {
 
+        log.info("Getting GSTIN management, page: {}, size: {}", pageable.getPageNumber(), pageable.getPageSize());
         try {
             IAuthContextViewModel auth = authContextFactory.getAuthContext(SecurityContextHolder.getContext());
-            log.info("Getting GSTIN management data for vendor: {}", auth.getUserId());
+            GstinManagementViewModel gstinManagement = settingsService.getGstinManagement(auth, pageable);
 
-            GstinManagementViewModel response = settingsService.getGstinManagement(auth);
-            return ResponseEntity.ok(ServerResponseFactory.success(response, "GSTIN data retrieved successfully"));
+            // Use the same static ServerResponseFactory as all other methods
+            return ResponseEntity.ok(ServerResponseFactory.success(gstinManagement, "GSTIN data retrieved successfully"));
+
         } catch (Exception e) {
             log.error("Error getting GSTIN management data", e);
+            // Use the same error factory as all other methods
             return ResponseEntity.internalServerError()
-                    .body(ServerResponseFactory.error("Failed to retrieve GSTIN data"));
+                    .body(ServerResponseFactory.error("Failed to retrieve GSTIN data: " + e.getMessage()));
         }
     }
+//    @Operation(summary = "Find API credential by GSTIN and Vendor Code", description = "Retrieve a specific API credential using a GSTIN and the associated Vendor Code for an OEM.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "API credential found successfully"),
+//            @ApiResponse(responseCode = "404", description = "Credential not found for the given combination"),
+//            @ApiResponse(responseCode = "500", description = "Internal server error")
+//    })
+//    @GetMapping("/credential/by-gstin/{gstin}/vendor-code/{vendorCode}")
+//    public ResponseEntity<ServerResponseViewModel<ApiCredentialsResponseViewModel>> findCredential(
+//            @PathVariable String gstin,
+//            @PathVariable String vendorCode) {
+//
+//        log.info("Request to find credential for GSTIN: {} and Vendor Code: {}", gstin, vendorCode);
+//        try {
+//            ApiCredentialsResponseViewModel credential = settingsService.findCredentialByGstinAndVendorCode(gstin, vendorCode);
+//            return ResponseEntity.ok(ServerResponseFactory.success(credential, "Credential retrieved successfully."));
+//        } catch (RuntimeException e) {
+//            // Handle "not found" exceptions thrown from the service
+//            log.warn("Credential not found for GSTIN {} and Vendor Code {}: {}", gstin, vendorCode, e.getMessage());
+//            return ResponseEntity.status(404).body(ServerResponseFactory.error(e.getMessage()));
+//        } catch (Exception e) {
+//            log.error("Error finding credential for GSTIN {} and Vendor Code {}", gstin, vendorCode, e);
+//            return ResponseEntity.internalServerError().body(ServerResponseFactory.error("An unexpected error occurred."));
+//        }
+//    }
 
     @Operation(summary = "Create new GSTIN", description = "Add a new GSTIN for the authenticated vendor")
     @ApiResponses(value = {

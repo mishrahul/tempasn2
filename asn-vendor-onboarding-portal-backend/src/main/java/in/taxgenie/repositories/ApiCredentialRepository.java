@@ -5,6 +5,7 @@ import in.taxgenie.entities.OemMaster;
 import in.taxgenie.entities.Vendor;
 import in.taxgenie.entities.enums.Environment;
 import in.taxgenie.repositories.base.BaseRepository;
+import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -205,4 +206,10 @@ public interface ApiCredentialRepository extends BaseRepository<ApiCredential> {
     Optional<ApiCredential> findByVendorAndOemAndCompanyCode(@Param("vendor") Vendor vendor,
                                                             @Param("oem") OemMaster oem,
                                                             @Param("companyCode") Long companyCode);
+
+    boolean existsByVendor(Vendor vendor);
+
+   // Optional<ApiCredential> findByVendorAndOem(Vendor vendor, OemMaster oem);
+
+
 }

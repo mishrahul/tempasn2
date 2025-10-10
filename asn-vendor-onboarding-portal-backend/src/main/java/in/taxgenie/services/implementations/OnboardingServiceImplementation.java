@@ -38,8 +38,6 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     private final OnboardingEventRepository onboardingEventRepository;
 
     private final VendorGstinRepository vendorGstinRepository;
-    private final VendorOemAccessRepository vendorOemAccessRepository; // <-- Inject this repository
-
 
     @Override
     public VendorRegistrationResponseViewModel registerVendor(VendorRegistrationRequestViewModel request, IAuthContextViewModel auth) {
@@ -214,40 +212,25 @@ public class OnboardingServiceImplementation implements IOnboardingService {
 
     @Override
     @Transactional(readOnly = true)
-    public VendorCodesViewModel findVendorCodesByGstin(String gstin) {
-        log.info("Searching for vendor codes associated with GSTIN: {}", gstin);
+    public VendorCheckResponseViewModel findVendorByGstin(String gstin) {
+        log.info("Searching for vendor associated with GSTIN: {}", gstin);
 
-        // 1. Find the GSTIN record (this part is the same as before).
+        // 1. Use the new repository method to find the GSTIN record.
         Optional<VendorGstin> gstinOptional = vendorGstinRepository.findByGstinIgnoreCase(gstin);
 
         if (gstinOptional.isEmpty()) {
-            // If no GSTIN is found, return an empty list.
-            return VendorCodesViewModel.builder()
-                    .gstin(gstin)
-                    .vendorCodes(Collections.emptyList())
+            // If no GSTIN record is found, return a clear "not registered" response.
+            return VendorCheckResponseViewModel.builder()
+                    .isRegistered(false)
+                    .message("No vendor is associated with the provided GSTIN.")
                     .build();
         }
 
-        // 2. Get the associated Vendor object.
+        // 2. If the GSTIN record is found, get the associated Vendor object from it.
         Vendor vendor = gstinOptional.get().getVendor();
 
-        // 3. Use the new repository method to find all OEM access records for that vendor.
-        List<VendorOemAccess> accessRecords = vendorOemAccessRepository.findByVendor(vendor);
-
-        // 4. Extract just the vendor_code from each record into a list.
-        List<String> vendorCodes = accessRecords.stream()
-                .map(VendorOemAccess::getVendorCode)
-                .collect(Collectors.toList());
-
-        log.info("Found {} vendor codes for GSTIN: {}", vendorCodes.size(), gstin);
-
-        // 5. Build the new response ViewModel.
-        return VendorCodesViewModel.builder()
-                .gstin(gstin)
-                .vendorId(vendor.getVendorId())
-                .companyName(vendor.getCompanyName())
-                .vendorCodes(vendorCodes)
-                .build();
+        // 3. Reuse the existing ViewModel and helper method to build a consistent response.
+        return buildVendorCheckResponse(vendor);
     }
 
     /**

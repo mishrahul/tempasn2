@@ -75,6 +75,11 @@ public class VendorGstin extends BaseEntity {
     @Builder.Default
     private Set<VendorCode> vendorCodes = new HashSet<>();
 
+//    @NotBlank
+    @Size(max = 10)
+    @Column(name = "vendor_code", nullable = false, length = 10)
+    private String vendorCode;
+
     @Override
     public String toString() {
         return "VendorGstin{" +
