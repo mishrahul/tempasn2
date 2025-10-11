@@ -75,6 +75,11 @@ public class VendorGstin extends BaseEntity {
     @Builder.Default
     private Set<VendorCode> vendorCodes = new HashSet<>();
 
+    @OneToMany(mappedBy = "vendorGstin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @Builder.Default
+    private Set<ApiCredential> apiCredentials = new HashSet<>();
+
 //    @NotBlank
     @Size(max = 10)
     @Column(name = "vendor_code", nullable = false, length = 10)

@@ -26,6 +26,9 @@ public class ApiCredentialsRequestViewModel {
     @NotBlank(message = "OEM ID is required")
     private String oemId;
 
+    @NotBlank(message = "GSTIN ID is required")
+    private String gstin;
+
     @NotBlank(message = "e-Sakha User ID is required")
     private String eSakhaUserId;
 

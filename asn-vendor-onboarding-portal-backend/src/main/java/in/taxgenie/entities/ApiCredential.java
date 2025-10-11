@@ -113,6 +113,12 @@ public class ApiCredential extends BaseEntity {
     @Builder.Default
     private Set<ApiRequestLog> apiRequestLogs = new HashSet<>();
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gstin", nullable = false, foreignKey = @ForeignKey(name = "fk_api_credentials_gstin"))
+    @JsonBackReference
+    private VendorGstin vendorGstin;
+
     @Override
     public String toString() {
         return "ApiCredential{" +

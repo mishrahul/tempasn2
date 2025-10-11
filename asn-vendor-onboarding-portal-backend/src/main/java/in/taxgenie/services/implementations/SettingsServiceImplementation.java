@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -179,7 +180,7 @@ public class SettingsServiceImplementation implements ISettingsService {
                     .totalPages(gstinPage.getTotalPages())
                     .totalItems(gstinPage.getTotalElements())
                     .build();
-
+                    
         } catch (Exception e) {
             logger.error("Error getting GSTIN management for vendor: {}", auth.getUserId(), e);
             throw new RuntimeException("Failed to get GSTIN management: " + e.getMessage());
@@ -236,9 +237,9 @@ public class SettingsServiceImplementation implements ISettingsService {
                     .orElseThrow(() -> new RuntimeException("GSTIN not found"));
 
             // Verify ownership
-            if (!vendorGstin.getVendor().getUserId().equals(auth.getUserId())) {
-                throw new RuntimeException("Access denied");
-            }
+//            if (!vendorGstin.getVendor().getUserId().equals(auth.getUserId())) {
+//                throw new RuntimeException("Access denied");
+//            }
 
             // If this is set as primary, unset other primary GSTINs
             if (request.isPrimary() && !vendorGstin.getIsPrimary()) {
@@ -246,6 +247,7 @@ public class SettingsServiceImplementation implements ISettingsService {
             }
 
             vendorGstin.setIsPrimary(request.isPrimary());
+            vendorGstin.setVendorCode(request.getVendorCode());
             vendorGstin.setUpdatedAt(LocalDateTime.now());
 
             vendorGstin = vendorGstinRepository.save(vendorGstin);
@@ -288,6 +290,7 @@ public class SettingsServiceImplementation implements ISettingsService {
         }
     }
 
+    // Helper methods
     private GstinManagementViewModel.GstinDetailViewModel mapToGstinDetailViewModel(VendorGstin vendorGstin) {
 
         boolean credentialsExist = apiCredentialRepository.existsByVendor(vendorGstin.getVendor());
@@ -304,7 +307,7 @@ public class SettingsServiceImplementation implements ISettingsService {
                 .verifiedAt(vendorGstin.getVerifiedAt() != null ? vendorGstin.getVerifiedAt().format(DATE_FORMATTER) : null)
                 .status(vendorGstin.getIsVerified() ? "VERIFIED" : "PENDING")
                 .createdAt(vendorGstin.getCreatedAt() != null ? vendorGstin.getCreatedAt().format(DATE_FORMATTER) : null)
-                .areCredentialsCreated(credentialsExist) // Set the new boolean flag
+                .areCredentialsCreated(vendorGstin.getApiCredentials().isEmpty() ? false : true) // Set the new boolean flag
                 .build();
     }
 

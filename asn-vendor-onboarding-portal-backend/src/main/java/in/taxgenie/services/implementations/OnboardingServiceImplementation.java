@@ -84,7 +84,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                 .cinNumber(null) // CIN can be added later via profile update
                 .primaryContact(primaryContactJson)
                 .authCredentials(authCredentialsJson)
-                .status(Status.ACTIVE)
+                .status(Status.INACTIVE)
                 .lastActivityAt(LocalDateTime.now())
                 .build();
 
@@ -107,7 +107,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                 .vendorCode(vendorCode)
                 .companyName(vendor.getCompanyName())
                 .panNumber(vendor.getPanNumber())
-                .status("ACTIVE")
+                .status("INACTIVE") // Status is INACTIVE until at least one GSTIN is added
                 .registeredAt(vendor.getCreatedAt())
                 .primaryContact(VendorRegistrationResponseViewModel.ContactInfoViewModel.builder()
                     .name(request.getContactPersonName())
@@ -433,6 +433,11 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             .orElseThrow(() -> new RuntimeException("Vendor not found for user: " + auth.getUserId()));
     }
 
+    private VendorGstin getVendorGstingById(String gstinId) {
+        return vendorGstinRepository.findById(UUID.fromString(gstinId))
+                .orElseThrow(() -> new RuntimeException("VendorGSTIN not found for Id: " + gstinId));
+    }
+
     private OemMaster getOemByCode(String oemCode) {
         return oemMasterRepository.findByOemCode(oemCode)
             .orElseThrow(() -> new RuntimeException("OEM not found: " + oemCode));
@@ -717,6 +722,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             // Get vendor and OEM
             Vendor vendor = getVendorByAuth(auth);
             OemMaster oem = getOemById(request.getOemId());
+            VendorGstin vendorGstin = getVendorGstingById(request.getGstin());
 
             // Validate e-Sakha credentials (mock validation)
             if (!validateESakhaCredentials(request.getESakhaUserId(), request.getESakhaPassword())) {
@@ -726,7 +732,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             // Check if credentials already exist for this vendor, OEM, and environment
             Environment environment = Environment.valueOf(request.getEnvironment().toUpperCase());
             Optional<ApiCredential> existingCredential = apiCredentialRepository
-                .findByVendorAndOemAndEnvironment(vendor, oem, environment);
+                .findByVendorGstinAndOemAndEnvironment(vendorGstin, oem, environment);
 
             if (existingCredential.isPresent()) {
                 throw new RuntimeException("API credentials already exist for this OEM and environment. " +
@@ -753,6 +759,7 @@ public class OnboardingServiceImplementation implements IOnboardingService {
                         "failed_requests": 0,
                         "last_request_at": null
                     }""")
+                    .vendorGstin(vendorGstin)
                 .build();
             credential.setCompanyCode(auth.getCompanyCode());
 

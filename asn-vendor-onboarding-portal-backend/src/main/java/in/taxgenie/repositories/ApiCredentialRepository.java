@@ -3,6 +3,7 @@ package in.taxgenie.repositories;
 import in.taxgenie.entities.ApiCredential;
 import in.taxgenie.entities.OemMaster;
 import in.taxgenie.entities.Vendor;
+import in.taxgenie.entities.VendorGstin;
 import in.taxgenie.entities.enums.Environment;
 import in.taxgenie.repositories.base.BaseRepository;
 import in.taxgenie.viewmodels.onboarding.ApiCredentialsResponseViewModel;
@@ -56,6 +57,8 @@ public interface ApiCredentialRepository extends BaseRepository<ApiCredential> {
      * @return Optional containing the API credential if found
      */
     Optional<ApiCredential> findByVendorAndOemAndEnvironment(Vendor vendor, OemMaster oem, Environment environment);
+
+    Optional<ApiCredential> findByVendorGstinAndOemAndEnvironment(VendorGstin vendorGstin, OemMaster oem, Environment environment);
 
     /**
      * Find active API credentials by vendor
