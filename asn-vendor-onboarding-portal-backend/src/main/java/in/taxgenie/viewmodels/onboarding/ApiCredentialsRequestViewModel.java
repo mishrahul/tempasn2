@@ -29,6 +29,12 @@ public class ApiCredentialsRequestViewModel {
     @NotBlank(message = "GSTIN ID is required")
     private String gstin;
 
+    @NotBlank(message = "Vendor code ID is required")
+    private String vendorCode;
+
+    @NotBlank(message = "Client secret is required")
+    private String clientSecret;
+
     @NotBlank(message = "e-Sakha User ID is required")
     private String eSakhaUserId;
 

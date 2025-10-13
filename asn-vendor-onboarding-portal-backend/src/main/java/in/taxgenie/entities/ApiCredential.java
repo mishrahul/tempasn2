@@ -60,6 +60,12 @@ public class ApiCredential extends BaseEntity {
     @JsonBackReference
     private OemMaster oem;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_code", nullable = false, foreignKey = @ForeignKey(name = "fk_api_credentials_vendor_code"))
+    @JsonBackReference
+    private VendorCode vendorCode;
+
     @NotBlank
     @Size(max = 255)
     @Column(name = "api_key_hash", nullable = false, unique = true)

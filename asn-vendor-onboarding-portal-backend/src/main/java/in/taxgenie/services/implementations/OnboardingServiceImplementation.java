@@ -38,6 +38,8 @@ public class OnboardingServiceImplementation implements IOnboardingService {
     private final OnboardingEventRepository onboardingEventRepository;
 
     private final VendorGstinRepository vendorGstinRepository;
+    private final VendorCodeRepository vendorCodeRepository;
+
 
     @Override
     public VendorRegistrationResponseViewModel registerVendor(VendorRegistrationRequestViewModel request, IAuthContextViewModel auth) {
@@ -724,6 +726,19 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             OemMaster oem = getOemById(request.getOemId());
             VendorGstin vendorGstin = getVendorGstingById(request.getGstin());
 
+            VendorCode vendorCode = vendorCodeRepository.findByVendorCode(request.getVendorCode())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Vendor Code '" + request.getVendorCode() + "' not found."
+                    ));
+
+            // 2. CRITICAL VALIDATION: Ensure the found VendorCode belongs to the correct GSTIN.
+            if (!vendorCode.getVendorGstin().getGstinId().equals(vendorGstin.getGstinId())) {
+                throw new SecurityException("The provided Vendor Code does not belong to the specified GSTIN.");
+            }
+            if (!vendorCode.getVendorGstin().getVendor().getVendorId().equals(vendor.getVendorId())) {
+                throw new SecurityException("The provided Vendor Code does not belong to the authenticated vendor.");
+            }
+
             // Validate e-Sakha credentials (mock validation)
             if (!validateESakhaCredentials(request.getESakhaUserId(), request.getESakhaPassword())) {
                 throw new RuntimeException("Invalid e-Sakha credentials");
@@ -740,12 +755,15 @@ public class OnboardingServiceImplementation implements IOnboardingService {
             }
 
             // Generate secret
-            String clientSecret = "SEC_" + UUID.randomUUID().toString().replace("-", "").substring(0, 32).toUpperCase();
+            //String clientSecret2 = "SEC_" + UUID.randomUUID().toString().replace("-", "").substring(0, 32).toUpperCase();
+
+            String clientSecret =   request.getClientSecret();
 
             // Create API credentials
             ApiCredential credential = ApiCredential.builder()
                 .vendor(vendor)
                 .oem(oem)
+                    .vendorCode(vendorCode)
                 .apiKeyHash("ASN_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase())
                 .secretEncrypted(clientSecret) // Store the secret (in production, this should be encrypted)
                 .environment(environment)
